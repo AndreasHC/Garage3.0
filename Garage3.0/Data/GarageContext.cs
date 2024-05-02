@@ -17,8 +17,9 @@ namespace Garage3.Data
             modelBuilder.Entity<Member>()
                 .HasIndex(b => b.PersonalIdentificationNumber).IsUnique();
 
-            modelBuilder.Entity<Member>()
-                .HasIndex(b => b.FirstName + b.LastName).IsUnique();
+            // Uncomment if require FullName to be unique
+            //modelBuilder.Entity<Member>()
+            //    .HasIndex(b => b.FullName).IsUnique();
 
             modelBuilder.Entity<Member>()
                 .Property(b => b.PersonalIdentificationNumber).HasMaxLength(11);
