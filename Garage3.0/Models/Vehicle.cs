@@ -10,7 +10,8 @@
 
         // Relationships
         public int VehicleTypeId { get; set; }
-        public Member Owner { get; set; }
-        public VehicleType VehicleType { get; set; }
+        public Member? Owner { get; set; }
+        public int OwnerId { get; set; }
+        public VehicleType? VehicleType { get; set; }
     }
 }

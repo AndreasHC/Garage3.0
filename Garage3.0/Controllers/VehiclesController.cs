@@ -48,6 +48,7 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id");
+            ViewData["OwnerId"] = new SelectList(_context.Members, "Id", "Id");
             return View();
         }
 
@@ -56,7 +57,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
