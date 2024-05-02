@@ -4,7 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Garage3._0</RootNamespace>
+    <RootNamespace>Garage3</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="microsoft.entityframeworkcore.SqlServer" Version="8.0.4" />
+  </ItemGroup>
 
 </Project>

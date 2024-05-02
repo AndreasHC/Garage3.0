@@ -1,8 +1,8 @@
-using Garage3._0.Models;
+using Garage3.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Garage3._0.Controllers
+namespace Garage3.Controllers
 {
     public class HomeController : Controller
     {

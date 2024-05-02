@@ -1,4 +1,4 @@
-namespace Garage3._0
+namespace Garage3
 {
     public class Program
     {
