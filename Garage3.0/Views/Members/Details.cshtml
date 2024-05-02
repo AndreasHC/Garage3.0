@@ -34,6 +34,22 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.PersonalIdentificationNumber)
         </dd>
+        <dt class="col-sm-2">
+           <p>Vehicles Count</p>
+        </dt>
+       
+        <dd class="col-sm-10">
+            
+            @if (Model.Vehicles != null)
+            {
+                @Html.DisplayFor(model => model.Vehicles.Count)
+            }
+            else
+            {
+                <p>0</p>
+            }
+        </dd>
+       
     </dl>
 </div>
 <div>
