@@ -1,3 +1,9 @@
+using Garage3.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
+
+
 namespace Garage3
 {
     public class Program
@@ -9,6 +15,13 @@ namespace Garage3
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Build a configuration to access the connection string.
+            var configuration = builder.Configuration;
+
+            builder.Services.AddDbContext<GarageContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -1,18 +1,16 @@
 ﻿namespace Garage3.Data
 {
-    public partial class GarageContext
+    public class Vehicle
     {
-        public class Vehicle
-        {
-            public int Id { get; set; }
-            public string RegistrationNumber { get; set; }
-            public int VehicleTypeId { get; set; }
-            public VehicleType VehicleType { get; set; }
-            public DateTime ParkingTime { get; set; }
+        public int Id { get; set; }
+        public string RegistrationNumber { get; set; }
+        public string Color { get; set; }
+        public string Brand { get; set; }
+        public DateTime ParkingTime { get; set; }
 
-            // Relationships
-            public Member Owner { get; set; }
-
-        }
+        // Relationships
+        public int VehicleTypeId { get; set; }
+        public Member Owner { get; set; }
+        public VehicleType VehicleType { get; set; }
     }
 }
