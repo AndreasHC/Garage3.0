@@ -7,6 +7,6 @@
         public int NumberOfWheels { get; set; }
 
         // Relationships
-        public List<Vehicle> Vehicles { get; set; }
+        public List<Vehicle>? Vehicles { get; set; }
     }
 }
