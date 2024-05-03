@@ -59,6 +59,7 @@
                     <th>Brand</th>
                     <th>Color</th>
                     <th>Parked since</th>
+                    <th>Link To Vehicle</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,6 +71,7 @@
                         <td>@vehicle.Brand</td>
                         <td>@vehicle.Color</td>
                         <td>@vehicle.ParkingTime.ToString("yyyy-MM-dd HH:mm")</td> <!-- Displaying parking time -->
+                        <td><a asp-action="Details" asp-controller="Vehicles" asp-route-id="@vehicle?.Id">Link</a> |</td>
                     </tr>
                 }
             </tbody>
