@@ -48,7 +48,7 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
-            ViewData["OwnerId"] = new SelectList(_context.Members.Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
+            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member=> member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
             return View();
         }
 
