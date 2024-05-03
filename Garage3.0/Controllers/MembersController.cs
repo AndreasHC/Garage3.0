@@ -21,7 +21,8 @@ namespace Garage3.Controllers
         // GET: Members
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Members.ToListAsync());
+           
+            return View(await _context.Members.Include(p => p.Vehicles).ToListAsync());
         }
 
         // GET: Members/Details/5
@@ -33,7 +34,9 @@ namespace Garage3.Controllers
             }
 
             // Added Include p.Vehicles to connect the Vehicles with Member
-            var member = await _context.Members.Include(p => p.Vehicles)
+            var member = await _context.Members
+                .Include(p => p.Vehicles)
+                .ThenInclude(v => v.VehicleType) // Include VehicleType for each Vehicle
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (member == null)
             {
