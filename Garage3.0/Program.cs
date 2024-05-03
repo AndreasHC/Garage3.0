@@ -45,6 +45,12 @@ namespace Garage3
             app.MapControllerRoute(
                 name: "Member",
                 pattern: "{controller=Member}/{action=Index}/{id?}");
+            app.MapControllerRoute(
+                name: "Vehicles",
+                pattern: "{controller=Vehicles}/{action=Index}/{id?}");
+            app.MapControllerRoute(
+                name: "VehicleTypes",
+                pattern: "{controller=VehicleTypes}/{action=Index}/{id?}");
 
             app.Run();
         }

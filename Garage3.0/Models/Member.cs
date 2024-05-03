@@ -7,11 +7,14 @@ namespace Garage3.Data
     public class Member
     {
         public int Id { get; set; }
+        [MaxLength(50)]
         public string FirstName { get; set; }
+        [MaxLength(50)]
         public string LastName { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime DateOfBirth { get; set; }
+        [MaxLength(11)]
         public string PersonalIdentificationNumber { get; set; }
 
         // Create a new read-only property for the full name

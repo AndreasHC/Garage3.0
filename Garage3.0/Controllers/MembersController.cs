@@ -32,7 +32,8 @@ namespace Garage3.Controllers
                 return NotFound();
             }
 
-            var member = await _context.Members
+            // Added Include p.Vehicles to connect the Vehicles with Member
+            var member = await _context.Members.Include(p => p.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (member == null)
             {

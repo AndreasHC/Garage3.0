@@ -21,28 +21,8 @@ namespace Garage3.Data
             //modelBuilder.Entity<Member>()
             //    .HasIndex(b => b.FullName).IsUnique();
 
-            modelBuilder.Entity<Member>()
-                .Property(b => b.PersonalIdentificationNumber).HasMaxLength(11);
-
-            modelBuilder.Entity<Member>()
-                .Property(b => b.FirstName).HasMaxLength(50);
-
-            modelBuilder.Entity<Member>()
-                .Property(b => b.LastName).HasMaxLength(50);
-
             modelBuilder.Entity<VehicleType>()
                 .HasIndex(b => b.Name).IsUnique();
-
-            modelBuilder.Entity<VehicleType>()
-                .Property(b => b.Name).HasMaxLength(50);
-
-            modelBuilder.Entity<Vehicle>(entity =>
-            {
-                entity.HasOne(d => d.VehicleType)
-                    .WithMany(p => p.Vehicles)
-                    .HasForeignKey(d => d.VehicleTypeId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
         }
     }
 }
