@@ -54,7 +54,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <td>Vehicle Type</td>
+                    <th>Vehicle Type</th>
                     <th>Registration Number</th>
                     <th>Brand</th>
                     <th>Color</th>
@@ -65,7 +65,7 @@
                 @foreach (var vehicle in Model.Vehicles)
                 {
                     <tr>
-                        <td>@vehicle.VehicleType</td>
+                        <td>@vehicle.VehicleType.Name</td>
                         <td>@vehicle.RegistrationNumber</td>
                         <td>@vehicle.Brand</td>
                         <td>@vehicle.Color</td>
