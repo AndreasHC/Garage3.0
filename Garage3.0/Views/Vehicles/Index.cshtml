@@ -27,6 +27,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.VehicleType)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Owner)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Owner.MembershipType)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -44,10 +50,16 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ParkingTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.VehicleType.Id)
-            </td>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VehicleType.Name)
+                </td>
+                <td>
+                    <a asp-controller="Members" asp-action="Details" asp-route-id=@item.OwnerId>@Html.DisplayFor(modelItem => item.Owner.FullName)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Owner.MembershipType)
+                </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
