@@ -77,6 +77,11 @@ namespace Garage3.Controllers
                 }
 
                 else
+                if (_context.Members.Any(m => m.PersonalIdentificationNumber == member.PersonalIdentificationNumber))
+                {
+                    ModelState.AddModelError("PersonalIdentificationNumber", "Personal number must be unique");
+                }
+                else
                 {
                     _context.Add(member);
                     await _context.SaveChangesAsync();
