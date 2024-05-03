@@ -70,9 +70,18 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(member);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (member.FirstName == member.LastName)
+                {
+                    ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
+                    return View(member);
+                }
+
+                else
+                {
+                    _context.Add(member);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             return View(member);
         }
