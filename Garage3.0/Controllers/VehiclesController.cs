@@ -47,8 +47,8 @@ namespace Garage3.Controllers
         // GET: Vehicles/Create
         public IActionResult Create()
         {
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id");
-            ViewData["OwnerId"] = new SelectList(_context.Members, "Id", "Id");
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
+            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member=> member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
             return View();
         }
 
@@ -57,10 +57,11 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
+                vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
