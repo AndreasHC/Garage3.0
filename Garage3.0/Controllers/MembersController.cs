@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Garage3.Controllers
 {
@@ -105,6 +107,18 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
+            
+                 
+                 if(member.FirstName == member.LastName )
+                {
+                    ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
+                    return View(member);
+                }
+                
+                else
+                {
+                   
+               
                 try
                 {
                     _context.Update(member);
@@ -120,6 +134,7 @@ namespace Garage3.Controllers
                     {
                         throw;
                     }
+                }
                 }
                 return RedirectToAction(nameof(Index));
             }
