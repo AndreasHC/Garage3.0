@@ -21,8 +21,15 @@ namespace Garage3.Controllers
         // GET: Members
         public async Task<IActionResult> Index()
         {
-           
-            return View(await _context.Members.Include(p => p.Vehicles).ToListAsync());
+            var members = await _context.Members
+                .Include(p => p.Vehicles)
+                .ToListAsync();
+
+            var sortedMembers = members
+                .OrderBy(p => p.FirstName.Substring(0, 2), StringComparer.Ordinal)
+                .ToList();
+
+            return View(sortedMembers);
         }
 
         // GET: Members/Details/5
@@ -133,6 +140,7 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
+
 
             return View(member);
         }
