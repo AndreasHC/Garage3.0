@@ -1,10 +1,10 @@
 ﻿@model Garage3.Data.Vehicle
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Park";
 }
 
-<h1>Create</h1>
+<h1>Park a vehicle</h1>
 
 <h4>Vehicle</h4>
 <hr />
@@ -36,7 +36,7 @@
                 <select asp-for="OwnerId" class="form-control" asp-items="ViewBag.OwnerId"></select>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Park" class="btn btn-primary" />
             </div>
         </form>
     </div>
