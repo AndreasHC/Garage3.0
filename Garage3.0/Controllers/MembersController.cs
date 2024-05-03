@@ -21,7 +21,8 @@ namespace Garage3.Controllers
         // GET: Members
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Members.ToListAsync());
+           
+            return View(await _context.Members.Include(p => p.Vehicles).ToListAsync());
         }
 
         // GET: Members/Details/5
