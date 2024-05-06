@@ -87,7 +87,17 @@ namespace Garage3.Controllers
                 }
 
                 // Use Personal Id Number to set BirthDate
-                DateTime? birthDate = GetBirthDate(member.PersonalIdentificationNumber);
+                DateTime? birthDate;
+                try
+                {
+                    birthDate = GetBirthDate(member.PersonalIdentificationNumber);
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    // Use exception message as model error message for now
+                    ModelState.AddModelError("PersonalIdentificationNumber", ex.Message);
+                    return View(member);
+                }
 
                 if (birthDate is null)
                 {
@@ -164,7 +174,18 @@ namespace Garage3.Controllers
                     ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
                     return View(member);
                 }
-                
+
+                // Validate that the given Personal Id Number is unchanged. 
+                // Find the member data from _context
+                var originalMember = await _context.Members.FindAsync(member.Id);
+
+                if (originalMember is null ||
+                    member.PersonalIdentificationNumber != originalMember.PersonalIdentificationNumber)
+                {
+                    ModelState.AddModelError(String.Empty, "You must not change the Personal Id Number.");
+                    return View(originalMember);
+                }
+
                 try
                 {
                     _context.Update(member);
@@ -184,6 +205,7 @@ namespace Garage3.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+
             return View(member);
         }
 
