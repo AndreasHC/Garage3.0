@@ -25,15 +25,8 @@ namespace Garage3.Controllers
         // GET: Members
         public async Task<IActionResult> Index()
         {
-            var members = await _context.Members
-                .Include(p => p.Vehicles)
-                .ToListAsync();
-
-            var sortedMembers = members
-                .OrderBy(p => p.FirstName.Substring(0, 2), StringComparer.Ordinal)
-                .ToList();
-
-            return View(sortedMembers);
+           
+            return View(await _context.Members.Include(p => p.Vehicles).OrderBy(p => EF.Functions.Collate(p.FirstName.Substring(0, 2), "Latin1_General_BIN")).ToListAsync());
         }
 
 
