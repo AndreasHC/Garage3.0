@@ -41,16 +41,18 @@
                 <span asp-validation-for="OwnerId" class="text-danger"></span>
             </div>
 
-            <input type="hidden" asp-for="VehicleTypeId" />
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="VehicleTypeId" class="control-label"></label>
-              
-                <select disable asp-for="VehicleTypeId" class="form-control" asp-items="@ViewBag.VehicleTypeId"></select>
-               
+                <input asp-for="VehicleTypeId" class="form-control" readonly />
                 <span asp-validation-for="VehicleTypeId" class="text-danger"></span>
-            </div> 
+            </div>
 
-            
+            <div class="form-group">
+                <label class="control-label">Vehicle Type Name</label>
+                <input class="form-control" value="@ViewBag.VehicleTypeName" readonly />
+            </div>
+         
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
