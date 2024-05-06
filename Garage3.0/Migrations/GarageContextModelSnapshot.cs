@@ -45,8 +45,8 @@ namespace Garage3.Migrations
 
                     b.Property<string>("PersonalIdentificationNumber")
                         .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.HasKey("Id");
 
