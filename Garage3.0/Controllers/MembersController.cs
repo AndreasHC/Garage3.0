@@ -75,8 +75,8 @@ namespace Garage3.Controllers
                 if (member.PersonalIdentificationNumber.IndexOf('-') < 0)
                 {
                     string id = member.PersonalIdentificationNumber;
-                    string formatedId = $"{id.Substring(0, 6)}-{id.Substring(6)}";
-                    member.PersonalIdentificationNumber = id;
+                    string formatedId = $"{id.Substring(0, 8)}-{id.Substring(8)}";
+                    member.PersonalIdentificationNumber = formatedId;
                 }
 
                 // Use Personal Id Number to set BirthDate
@@ -92,7 +92,7 @@ namespace Garage3.Controllers
                 }
                 else
                 {
-                    member.DateOfBirth = (DateTime)birthDate;
+                    
                     _context.Add(member);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -147,7 +147,10 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-            
+                //// Validate that personal number is not changed
+                //var originalMember = await _context.Members.FindAsync(member.Id);
+                //if (originalMember ==   )
+
                  
                  if(member.FirstName == member.LastName )
                 {
