@@ -112,7 +112,7 @@ namespace Garage3.Controllers
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
                     // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-                    return View();
+                    return View(vehicle);
                 }else
                 {
                     vehicle.ParkingTime = DateTime.Now;
