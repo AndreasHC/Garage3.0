@@ -107,10 +107,19 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
-                vehicle.ParkingTime = DateTime.Now;
-                _context.Add(vehicle);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (_context.Vehicles.Any(m => m.RegistrationNumber == vehicle.RegistrationNumber))
+                {
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
+                    // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+                    return View();
+                }else
+                {
+                    vehicle.ParkingTime = DateTime.Now;
+                    _context.Add(vehicle);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
             return View(vehicle);
