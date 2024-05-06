@@ -99,12 +99,25 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
-                vehicle.ParkingTime = DateTime.Now;
-                _context.Add(vehicle);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (_context.Vehicles.Any(m => m.RegistrationNumber == vehicle.RegistrationNumber))
+                {
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
+                    // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+                    ViewData["OwnerId"] = new SelectList(_context.Members.Where(member => member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
+                    return View(vehicle);
+                }
+                else
+                {
+                    vehicle.ParkingTime = DateTime.Now;
+                    _context.Add(vehicle);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+            // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member => member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
             return View(vehicle);
         }
 
@@ -121,17 +134,29 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            ViewBag.OwnerId = vehicle.OwnerId;
+
+            var selectedVehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId);
+            if (selectedVehicleType != null)
+            {
+                ViewBag.VehicleTypeName = selectedVehicleType.Name;
+            }
+            else
+            {
+                ViewBag.VehicleTypeName = ""; // Om det inte finns någon matchande VehicleType, sätt VehicleTypeName till en tom sträng
+            }
+
+            ViewData["OwnerId"] = vehicle.OwnerId;
             return View(vehicle);
         }
+
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
+        
+        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {
@@ -140,25 +165,46 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
-                    _context.Update(vehicle);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+
+                    ViewBag.OwnerId = vehicle.OwnerId;
+
+                    // Hämta och sätt VehicleTypeName igen
+                    ViewBag.VehicleTypeName = await _context.VehicleTypes
+                        .Where(vt => vt.Id == vehicle.VehicleTypeId)
+                        .Select(vt => vt.Name)
+                        .FirstOrDefaultAsync();
+
+                    return View(vehicle);
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(vehicle);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!VehicleExists(vehicle.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
         }
 

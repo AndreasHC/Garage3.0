@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Garage3.Controllers
 {
@@ -24,6 +26,7 @@ namespace Garage3.Controllers
            
             return View(await _context.Members.Include(p => p.Vehicles).OrderBy(p => EF.Functions.Collate(p.FirstName.Substring(0, 2), "Latin1_General_BIN")).ToListAsync());
         }
+
 
         // GET: Members/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -61,9 +64,23 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(member);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (member.FirstName == member.LastName)
+                {
+                    ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
+                    return View(member);
+                }
+
+                else
+                if (_context.Members.Any(m => m.PersonalIdentificationNumber == member.PersonalIdentificationNumber))
+                {
+                    ModelState.AddModelError("PersonalIdentificationNumber", "Personal number must be unique");
+                }
+                else
+                {
+                    _context.Add(member);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             return View(member);
         }
@@ -98,6 +115,18 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
+            
+                 
+                 if(member.FirstName == member.LastName )
+                {
+                    ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
+                    return View(member);
+                }
+                
+                else
+                {
+                   
+               
                 try
                 {
                     _context.Update(member);
@@ -113,6 +142,7 @@ namespace Garage3.Controllers
                     {
                         throw;
                     }
+                }
                 }
                 return RedirectToAction(nameof(Index));
             }
