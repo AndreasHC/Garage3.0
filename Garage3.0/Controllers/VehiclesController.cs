@@ -116,6 +116,23 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
+        //// GET: Vehicles/Edit/5
+        //public async Task<IActionResult> Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var vehicle = await _context.Vehicles.FindAsync(id);
+        //    if (vehicle == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+        //    ViewBag.OwnerId = vehicle.OwnerId;
+        //    return View(vehicle);
+        //}
         // GET: Vehicles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -129,8 +146,18 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            ViewBag.OwnerId = vehicle.OwnerId;
+
+            var selectedVehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId);
+            if (selectedVehicleType != null)
+            {
+                ViewBag.VehicleTypeName = selectedVehicleType.Name;
+            }
+            else
+            {
+                ViewBag.VehicleTypeName = ""; // Om det inte finns någon matchande VehicleType, sätt VehicleTypeName till en tom sträng
+            }
+
+            ViewData["OwnerId"] = vehicle.OwnerId;
             return View(vehicle);
         }
 
