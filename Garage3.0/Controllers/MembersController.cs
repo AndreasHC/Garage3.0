@@ -70,7 +70,19 @@ namespace Garage3.Controllers
                     ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
                     return View(member);
                 }
-                else if (!IsValidIdFormat(member.PersonalIdentificationNumber, ModelState))
+
+                // Standardize representation of Personal Id Number
+                if (member.PersonalIdentificationNumber.IndexOf('-') < 0)
+                {
+                    string id = member.PersonalIdentificationNumber;
+                    string formatedId = $"{id.Substring(0, 6)}-{id.Substring(6)}";
+                    member.PersonalIdentificationNumber = id;
+                }
+
+                // Use Personal Id Number to set BirthDate
+                DateTime? birthDate = GetBirthDate(member.PersonalIdentificationNumber);
+
+                if (birthDate is null)
                 {
                     ModelState.AddModelError("PersonalIdentificationNumber", "Bad format on Personal Id Number.");
                 }
@@ -80,49 +92,29 @@ namespace Garage3.Controllers
                 }
                 else
                 {
+                    member.DateOfBirth = (DateTime)birthDate;
                     _context.Add(member);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }
+
             return View(member);
         }
 
-        private bool IsValidIdFormat(Member member)
+        private DateTime? GetBirthDate(string id)
         {
-            var id = member.PersonalIdentificationNumber;
-            int index = id.IndexOf('-');
-            string date;
-            string last;
-
-            if (id.Length > 11)
-            {
-                date = id.Substring(0, 8);
-                last = id.Substring(8);
-            }
-            else
-            {
-                date = id.Substring(0, 6);
-                last = id.Substring(6);
-            }
-
-            if (index > 0)
-            {
-                last = last.Substring(1);
-            }
-
+            string yearString;
+            string rest;
             int year;
-            if (!int.TryParse(date.Substring(0, date.Length - 4), out year)) return false;
-
             int month;
-            if (!int.TryParse(date.Substring(date.Length - 4, 2), out month)) return false;
-
             int day;
-            if (!int.TryParse(date.Substring(date.Length - 2, 2), out day)) return false;
 
-            var d = new DateOnly(year, month, day);
+            if (!int.TryParse(id.Substring(0, 4), out year) ||
+                !int.TryParse(id.Substring(4, 2), out month) ||
+                !int.TryParse(id.Substring(6, 2), out day)) return null;
 
-            return true;
+            return new DateTime(year, month, day);
         }
 
         // GET: Members/Edit/5
@@ -163,10 +155,6 @@ namespace Garage3.Controllers
                     return View(member);
                 }
                 
-                else
-                {
-                   
-               
                 try
                 {
                     _context.Update(member);
@@ -183,7 +171,7 @@ namespace Garage3.Controllers
                         throw;
                     }
                 }
-                }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
