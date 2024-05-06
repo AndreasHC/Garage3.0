@@ -122,6 +122,7 @@ namespace Garage3.Controllers
                 }
             }
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            //ViewData["OwnerId"] = new SelectList(_context.Members,"")
             return View(vehicle);
         }
 
