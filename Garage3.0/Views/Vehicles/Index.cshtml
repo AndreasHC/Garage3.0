@@ -9,6 +9,16 @@
 <p>
     <a asp-action="Create">Park a vehicle</a>
 </p>
+<p>
+    <form asp-controller="Vehicles" asp-action="Index">
+        <div class="form-group">
+            <label>@Html.DisplayNameFor(model => model.VehicleType)</label>
+            <select asp-items="ViewBag.VehicleTypeId" name ="soughtVehicleType"></select>
+        </div>
+
+        <button>Filter</button>
+    </form>
+</p>
 <table class="table">
     <thead>
         <tr>
