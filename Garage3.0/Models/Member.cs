@@ -17,7 +17,7 @@ namespace Garage3.Data
         [DataType(DataType.Date)]
         public DateTime DateOfBirth { get; set; }
 
-        [MaxLength(11)]
+        [MaxLength(13)]
         [RegularExpression("(\\d{6}|\\d{8})-?\\d{4}", ErrorMessage = "Not a valid Personal Id Number")]
         [DisplayName("Personal Id Number")]
         public string PersonalIdentificationNumber { get; set; }
