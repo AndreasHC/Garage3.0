@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
+using Garage3.Helpers;
 
 namespace Garage3.Controllers
 {
@@ -21,8 +22,45 @@ namespace Garage3.Controllers
         // GET: Vehicles
         public async Task<IActionResult> Index()
         {
+            ViewBag.VehicleTypeId = TypeFilterSelectList("All");
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
+        }
+
+
+        // POST: Filtered vehicles
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(string soughtVehicleType, string soughtRegistrationNumber)
+        {
+            ViewBag.VehicleTypeId = TypeFilterSelectList(soughtVehicleType);
+            IQueryable<Vehicle> garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v => v.Owner);
+            if (soughtVehicleType != "All")
+            {
+                int soughtVehicleTypeInt = int.Parse(soughtVehicleType);
+                garageContext = garageContext.Where(v => v.VehicleTypeId == soughtVehicleTypeInt);
+            }
+            if (!string.IsNullOrEmpty(soughtRegistrationNumber))
+            {
+                garageContext=garageContext.Where(v => v.RegistrationNumber.Contains(soughtRegistrationNumber));
+                ViewBag.RegistrationNumber = soughtRegistrationNumber;
+            }
+            return View(await garageContext.ToListAsync());
+
+        }
+
+        private IEnumerable<SelectListItem> TypeFilterSelectList(string soughtVehicleType)
+        {
+            bool isAll = soughtVehicleType == "All";
+            SelectList vehicleTypeSelectList;
+            if (isAll)
+                vehicleTypeSelectList = new SelectList(_context.VehicleTypes, "Id", "Name");
+            else
+                vehicleTypeSelectList = new SelectList(_context.VehicleTypes, "Id", "Name", soughtVehicleType);
+            SelectListItem AllOption = new SelectListItem("All", "All");
+            if (isAll)
+                AllOption.Selected = true;
+            return vehicleTypeSelectList.Prepend(AllOption);
         }
 
         // GET: Vehicles/Details/5
@@ -49,7 +87,14 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
-            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member=> member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
+            var members = _context.Members.ToList(); // This retrieves all members into memory
+            ViewData["OwnerId"] = new SelectList(
+                members
+                .Where(member => {
+                    var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
+                    return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
+                })
+                .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
             return View();
         }
 
