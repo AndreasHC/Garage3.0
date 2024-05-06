@@ -87,15 +87,21 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
+            ViewData["OwnerId"] = OwnerSelectList();
+            return View();
+        }
+
+        private SelectList OwnerSelectList()
+        {
             var members = _context.Members.ToList(); // This retrieves all members into memory
-            ViewData["OwnerId"] = new SelectList(
+            return new SelectList(
                 members
-                .Where(member => {
+                .Where(member =>
+                {
                     var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
                     return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
                 })
                 .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
-            return View();
         }
 
         // POST: Vehicles/Create
@@ -112,7 +118,7 @@ namespace Garage3.Controllers
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
                     // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-                    ViewData["OwnerId"] = new SelectList(_context.Members.Where(member => member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
+                    ViewData["OwnerId"] = OwnerSelectList();
                     return View(vehicle);
                 }
                 else
@@ -125,7 +131,7 @@ namespace Garage3.Controllers
             }
             // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member => member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
+            ViewData["OwnerId"] = OwnerSelectList();
             return View(vehicle);
         }
 
