@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using NuGet.Packaging.Rules;
 
 namespace Garage3.Controllers
 {
@@ -60,7 +61,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,DateOfBirth,PersonalIdentificationNumber")] Member member)
+        public async Task<IActionResult> Create(Member member)
         {
             if (ModelState.IsValid)
             {
@@ -69,9 +70,11 @@ namespace Garage3.Controllers
                     ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
                     return View(member);
                 }
-
-                else
-                if (_context.Members.Any(m => m.PersonalIdentificationNumber == member.PersonalIdentificationNumber))
+                else if (!IsValidIdFormat(member.PersonalIdentificationNumber, ModelState))
+                {
+                    ModelState.AddModelError("PersonalIdentificationNumber", "Bad format on Personal Id Number.");
+                }
+                else if (_context.Members.Any(m => m.PersonalIdentificationNumber == member.PersonalIdentificationNumber))
                 {
                     ModelState.AddModelError("PersonalIdentificationNumber", "Personal number must be unique");
                 }
@@ -83,6 +86,43 @@ namespace Garage3.Controllers
                 }
             }
             return View(member);
+        }
+
+        private bool IsValidIdFormat(Member member)
+        {
+            var id = member.PersonalIdentificationNumber;
+            int index = id.IndexOf('-');
+            string date;
+            string last;
+
+            if (id.Length > 11)
+            {
+                date = id.Substring(0, 8);
+                last = id.Substring(8);
+            }
+            else
+            {
+                date = id.Substring(0, 6);
+                last = id.Substring(6);
+            }
+
+            if (index > 0)
+            {
+                last = last.Substring(1);
+            }
+
+            int year;
+            if (!int.TryParse(date.Substring(0, date.Length - 4), out year)) return false;
+
+            int month;
+            if (!int.TryParse(date.Substring(date.Length - 4, 2), out month)) return false;
+
+            int day;
+            if (!int.TryParse(date.Substring(date.Length - 2, 2), out day)) return false;
+
+            var d = new DateOnly(year, month, day);
+
+            return true;
         }
 
         // GET: Members/Edit/5
