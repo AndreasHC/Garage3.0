@@ -112,8 +112,11 @@ namespace Garage3.Controllers
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
                     // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+                    ViewData["OwnerId"] = new SelectList(_context.Members.Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
+
                     return View(vehicle);
-                }else
+                }
+                else
                 {
                     vehicle.ParkingTime = DateTime.Now;
                     _context.Add(vehicle);
@@ -121,8 +124,10 @@ namespace Garage3.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
+            // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            //ViewData["OwnerId"] = new SelectList(_context.Members,"")
+            ViewData["OwnerId"] = new SelectList(_context.Members.Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
+
             return View(vehicle);
         }
 
