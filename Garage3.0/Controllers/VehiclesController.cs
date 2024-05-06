@@ -87,15 +87,21 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
+            ViewData["OwnerId"] = OwnerSelectList();
+            return View();
+        }
+
+        private SelectList OwnerSelectList()
+        {
             var members = _context.Members.ToList(); // This retrieves all members into memory
-            ViewData["OwnerId"] = new SelectList(
+            return new SelectList(
                 members
-                .Where(member => {
+                .Where(member =>
+                {
                     var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
                     return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
                 })
                 .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
-            return View();
         }
 
         // POST: Vehicles/Create
@@ -112,8 +118,7 @@ namespace Garage3.Controllers
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
                     // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-                    ViewData["OwnerId"] = new SelectList(_context.Members.Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
-
+                    ViewData["OwnerId"] = OwnerSelectList();
                     return View(vehicle);
                 }
                 else
@@ -126,28 +131,10 @@ namespace Garage3.Controllers
             }
             // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            ViewData["OwnerId"] = new SelectList(_context.Members.Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name", vehicle.OwnerId);
-
+            ViewData["OwnerId"] = OwnerSelectList();
             return View(vehicle);
         }
 
-        //// GET: Vehicles/Edit/5
-        //public async Task<IActionResult> Edit(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var vehicle = await _context.Vehicles.FindAsync(id);
-        //    if (vehicle == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-        //    ViewBag.OwnerId = vehicle.OwnerId;
-        //    return View(vehicle);
-        //}
         // GET: Vehicles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -176,42 +163,13 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
+
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
-        //{
-        //    if (id != vehicle.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            _context.Update(vehicle);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!VehicleExists(vehicle.Id))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
-        //    return View(vehicle);
-        //}
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {
