@@ -97,6 +97,10 @@ namespace Garage3.Controllers
                 {
                     ModelState.AddModelError("PersonalIdentificationNumber", "Bad format on Personal Id Number.");
                 }
+                else if (birthDate >= DateTime.Today)
+                {
+                    ModelState.AddModelError("PersonalIdentificationNumber", "Creating people from the future doesn't work in this reality.");
+                }
                 else if (_context.Members.Any(m => m.PersonalIdentificationNumber == member.PersonalIdentificationNumber))
                 {
                     ModelState.AddModelError("PersonalIdentificationNumber", "Personal number must be unique");
