@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
+using Garage3.Helpers;
 
 namespace Garage3.Controllers
 {
@@ -49,7 +50,14 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
-            ViewData["OwnerId"] = new SelectList(_context.Members.Where(member=> member.DateOfBirth.Date.AddYears(18) <= DateTime.Now.Date).Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
+            var members = _context.Members.ToList(); // This retrieves all members into memory
+            ViewData["OwnerId"] = new SelectList(
+                members
+                .Where(member => {
+                    var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
+                    return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
+                })
+                .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
             return View();
         }
 

@@ -14,9 +14,6 @@ namespace Garage3.Data
         [MaxLength(50)]
         public string LastName { get; set; }
 
-       
-       
-
         [MaxLength(13)]
         [RegularExpression(@"\d{8}-?\d{4}", ErrorMessage = "Not a valid Personal Id Number. Use format YYYYMMDD-NNNN.")]
         [DisplayName("Personal Id Number")]
