@@ -166,7 +166,37 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
+        //{
+        //    if (id != vehicle.Id)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            _context.Update(vehicle);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!VehicleExists(vehicle.Id))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+        //    return View(vehicle);
+        //}
+        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {
@@ -175,28 +205,48 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
-                    _context.Update(vehicle);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+
+                    ViewBag.OwnerId = vehicle.OwnerId;
+
+                    // Hämta och sätt VehicleTypeName igen
+                    ViewBag.VehicleTypeName = await _context.VehicleTypes
+                        .Where(vt => vt.Id == vehicle.VehicleTypeId)
+                        .Select(vt => vt.Name)
+                        .FirstOrDefaultAsync();
+
+                    return View(vehicle);
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(vehicle);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!VehicleExists(vehicle.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
         }
-
         // GET: Vehicles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
