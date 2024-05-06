@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using NuGet.Packaging.Rules;
 using Garage3.Helpers;
 
 namespace Garage3.Controllers
@@ -110,7 +102,7 @@ namespace Garage3.Controllers
                 }
                 else
                 {
-                    
+                  
                     _context.Add(member);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));

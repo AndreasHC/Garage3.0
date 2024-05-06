@@ -50,7 +50,7 @@ namespace Garage3.Migrations
                     b.HasIndex("PersonalIdentificationNumber")
                         .IsUnique();
 
-                    b.ToTable("Members");
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
@@ -91,7 +91,7 @@ namespace Garage3.Migrations
 
                     b.HasIndex("VehicleTypeId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("Garage3.Data.VehicleType", b =>
@@ -115,7 +115,7 @@ namespace Garage3.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("VehicleTypes");
+                    b.ToTable("VehicleTypes", (string)null);
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>

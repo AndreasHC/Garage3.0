@@ -27,5 +27,7 @@ namespace Garage3.Data
 
         // Relationships
         public List<Vehicle>? Vehicles { get; set; }
+
+       
     }
 }
