@@ -21,8 +21,45 @@ namespace Garage3.Controllers
         // GET: Vehicles
         public async Task<IActionResult> Index()
         {
+            ViewBag.VehicleTypeId = TypeFilterSelectList("All");
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
+        }
+
+
+        // POST: Filtered vehicles
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(string soughtVehicleType, string soughtRegistrationNumber)
+        {
+            ViewBag.VehicleTypeId = TypeFilterSelectList(soughtVehicleType);
+            IQueryable<Vehicle> garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v => v.Owner);
+            if (soughtVehicleType != "All")
+            {
+                int soughtVehicleTypeInt = int.Parse(soughtVehicleType);
+                garageContext = garageContext.Where(v => v.VehicleTypeId == soughtVehicleTypeInt);
+            }
+            if (!string.IsNullOrEmpty(soughtRegistrationNumber))
+            {
+                garageContext=garageContext.Where(v => v.RegistrationNumber.Contains(soughtRegistrationNumber));
+                ViewBag.RegistrationNumber = soughtRegistrationNumber;
+            }
+            return View(await garageContext.ToListAsync());
+
+        }
+
+        private IEnumerable<SelectListItem> TypeFilterSelectList(string soughtVehicleType)
+        {
+            bool isAll = soughtVehicleType == "All";
+            SelectList vehicleTypeSelectList;
+            if (isAll)
+                vehicleTypeSelectList = new SelectList(_context.VehicleTypes, "Id", "Name");
+            else
+                vehicleTypeSelectList = new SelectList(_context.VehicleTypes, "Id", "Name", soughtVehicleType);
+            SelectListItem AllOption = new SelectListItem("All", "All");
+            if (isAll)
+                AllOption.Selected = true;
+            return vehicleTypeSelectList.Prepend(AllOption);
         }
 
         // GET: Vehicles/Details/5
