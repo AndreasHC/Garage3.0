@@ -169,8 +169,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId,OwnerId")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Color,Brand,ParkingTime,VehicleTypeId, OwnerId")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {
@@ -221,7 +220,6 @@ namespace Garage3.Controllers
             ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
         }
-
         // GET: Vehicles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
