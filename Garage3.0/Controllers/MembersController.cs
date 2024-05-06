@@ -9,6 +9,7 @@ using Garage3.Data;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using NuGet.Packaging.Rules;
+using Garage3.Helpers;
 
 namespace Garage3.Controllers
 {
@@ -83,7 +84,7 @@ namespace Garage3.Controllers
                 DateTime? birthDate;
                 try
                 {
-                    birthDate = GetBirthDate(member.PersonalIdentificationNumber);
+                    birthDate = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
                 }
                 catch (ArgumentOutOfRangeException ex)
                 {
@@ -110,21 +111,6 @@ namespace Garage3.Controllers
             }
 
             return View(member);
-        }
-
-        private DateTime? GetBirthDate(string id)
-        {
-            string yearString;
-            string rest;
-            int year;
-            int month;
-            int day;
-
-            if (!int.TryParse(id.Substring(0, 4), out year) ||
-                !int.TryParse(id.Substring(4, 2), out month) ||
-                !int.TryParse(id.Substring(6, 2), out day)) return null;
-
-            return new DateTime(year, month, day);
         }
 
         // GET: Members/Edit/5
