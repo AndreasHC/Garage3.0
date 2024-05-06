@@ -15,7 +15,10 @@
             <label>@Html.DisplayNameFor(model => model.VehicleType)</label>
             <select asp-items="ViewBag.VehicleTypeId" name ="soughtVehicleType"></select>
         </div>
-
+        <div>
+            <label>@Html.DisplayNameFor(model => model.RegistrationNumber)</label>
+            <input name="soughtRegistrationNumber" value="@ViewBag.RegistrationNumber"/>
+        </div>
         <button>Filter</button>
     </form>
 </p>

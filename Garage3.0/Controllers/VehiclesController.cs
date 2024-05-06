@@ -30,7 +30,7 @@ namespace Garage3.Controllers
         // POST: Filtered vehicles
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(string soughtVehicleType)
+        public async Task<IActionResult> Index(string soughtVehicleType, string soughtRegistrationNumber)
         {
             ViewBag.VehicleTypeId = TypeFilterSelectList(soughtVehicleType);
             IQueryable<Vehicle> garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v => v.Owner);
@@ -38,6 +38,11 @@ namespace Garage3.Controllers
             {
                 int soughtVehicleTypeInt = int.Parse(soughtVehicleType);
                 garageContext = garageContext.Where(v => v.VehicleTypeId == soughtVehicleTypeInt);
+            }
+            if (!string.IsNullOrEmpty(soughtRegistrationNumber))
+            {
+                garageContext=garageContext.Where(v => v.RegistrationNumber.Contains(soughtRegistrationNumber));
+                ViewBag.RegistrationNumber = soughtRegistrationNumber;
             }
             return View(await garageContext.ToListAsync());
 
