@@ -62,10 +62,18 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
-                vehicle.ParkingTime = DateTime.Now;
-                _context.Add(vehicle);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (_context.Vehicles.Any(m => m.RegistrationNumber == vehicle.RegistrationNumber))
+                {
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
+                }
+                else
+                {
+                    vehicle.ParkingTime = DateTime.Now;
+                    _context.Add(vehicle);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+               
             }
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
             return View(vehicle);
@@ -84,6 +92,7 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
+
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
             ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
@@ -103,26 +112,39 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
-                    _context.Update(vehicle);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("RegistrationNumber", "Registreringsnumret måste vara unikt.");
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+                    ViewBag.OwnerId = vehicle.OwnerId; // Lägg till detta för att bevara OwnerId-värdet
+                    return View(vehicle); // Visa vyn med felmeddelandet
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(vehicle);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!VehicleExists(vehicle.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+                
                 return RedirectToAction(nameof(Index));
             }
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+            ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
+
         }
 
         // GET: Vehicles/Delete/5

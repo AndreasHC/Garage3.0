@@ -45,7 +45,7 @@
              <div class="form-group">
                 <label asp-for="VehicleTypeId" class="control-label"></label>
               
-                <select disable asp-for="VehicleTypeId" class="form-control" asp-items="ViewBag.VehicleTypeId"></select>
+                <select disable asp-for="VehicleTypeId" class="form-control" asp-items="@ViewBag.VehicleTypeId"></select>
                
                 <span asp-validation-for="VehicleTypeId" class="text-danger"></span>
             </div> 
