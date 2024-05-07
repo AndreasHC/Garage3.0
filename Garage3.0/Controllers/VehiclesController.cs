@@ -114,21 +114,46 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
+                bool problemDetected = false;
+                string errorKey = string.Empty;
+                string errorValue = string.Empty;
                 if (_context.Vehicles.Any(m => m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
-                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique");
+                    problemDetected = true;
+                    errorKey = "RegistrationNumber";
+                    errorValue = "Registration number must be unique";
+                }
+
+                var owner = await _context.Members.FindAsync(vehicle.OwnerId);
+                
+                if (owner == null)
+                {
+                    problemDetected = true;
+                    errorKey = "OwnerId";
+                    errorValue = "Member must be registered";
+                }
+
+                if (MemberHelper.GetBirthDate(owner.PersonalIdentificationNumber)?.AddYears(18) > DateTime.Today)
+                {
+                    problemDetected = true;
+                    errorKey = "OwnerId";
+                    errorValue = "Member must be at least 18 years old";
+                }
+
+                if (problemDetected)
+                {
+                    ModelState.AddModelError(errorKey, errorValue);
                     // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
                     ViewData["OwnerId"] = OwnerSelectList();
                     return View(vehicle);
                 }
-                else
-                {
-                    vehicle.ParkingTime = DateTime.Now;
-                    _context.Add(vehicle);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
+
+                vehicle.ParkingTime = DateTime.Now;
+                _context.Add(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+
             }
             // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
