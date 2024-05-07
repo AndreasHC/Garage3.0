@@ -50,7 +50,7 @@ namespace Garage3.Migrations
                     b.HasIndex("PersonalIdentificationNumber")
                         .IsUnique();
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
@@ -91,7 +91,7 @@ namespace Garage3.Migrations
 
                     b.HasIndex("VehicleTypeId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Garage3.Data.VehicleType", b =>
@@ -115,7 +115,20 @@ namespace Garage3.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("VehicleTypes", (string)null);
+                    b.ToTable("VehicleTypes");
+                });
+
+            modelBuilder.Entity("Garage3.Models.SpotOccupation", b =>
+                {
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpotId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VehicleId", "SpotId");
+
+                    b.ToTable("SpotOccupations");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
@@ -135,6 +148,17 @@ namespace Garage3.Migrations
                     b.Navigation("Owner");
 
                     b.Navigation("VehicleType");
+                });
+
+            modelBuilder.Entity("Garage3.Models.SpotOccupation", b =>
+                {
+                    b.HasOne("Garage3.Data.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Garage3.Data.Member", b =>
