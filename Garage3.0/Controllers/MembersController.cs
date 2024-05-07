@@ -100,7 +100,14 @@ namespace Garage3.Controllers
                 }
                 else
                 {
-                  
+                    _context.Add(new Membership
+                    {
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(30),
+                        Type = MembershipType.ProMember,
+                        MemberId = member.Id
+                    });
+
                     _context.Add(member);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
