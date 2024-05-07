@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
 using Garage3.Helpers;
+using Garage3.ViewModels;
 
 namespace Garage3.Controllers
 {
@@ -248,10 +249,18 @@ namespace Garage3.Controllers
             if (vehicle != null)
             {
                 _context.Vehicles.Remove(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Receipt), vehicle);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Receipt(Vehicle vehicle)
+        {
+            string parkerName = (await _context.Members.FindAsync(vehicle.OwnerId)).FullName;
+            Receipt receipt = new Receipt(vehicle, parkerName);
+            return View(receipt);
         }
 
         private bool VehicleExists(int id)
