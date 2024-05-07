@@ -4,6 +4,27 @@ using System.Runtime.CompilerServices;
 
 namespace Garage3.Data
 {
+    public enum MembershipType
+    {
+        RegularMember,
+        ProMember
+    }
+
+    public class Membership
+    {
+        public int Id { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public MembershipType Type { get; set; }    // Regular, Pro
+
+        // Navigation property to member
+        public Member Member { get; set; }
+
+        // Foreign key to Member
+        public int MemberId { get; set; }
+
+    }
+
     public class Member
     {
         public int Id { get; set; }
