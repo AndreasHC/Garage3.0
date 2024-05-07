@@ -10,6 +10,9 @@ namespace Garage3.Data
         public string Name { get; set; } = null!;
         [DisplayName("Number of Wheels")]
         public int NumberOfWheels { get; set; }
+        public int Size {  get; set; }
+        [DisplayName("Size is Vehicles per Spot")]
+        public bool SizeIsInverted { get; set; }
 
         // Relationships
         public List<Vehicle>? Vehicles { get; set; }
