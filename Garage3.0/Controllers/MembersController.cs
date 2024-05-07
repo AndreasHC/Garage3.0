@@ -100,10 +100,13 @@ namespace Garage3.Controllers
                 }
                 else
                 {
+                    var startDate = DateTime.Today;
+                    var endDate = (birthDate?.AddYears(65) < DateTime.Today) ? startDate.AddDays(30) : startDate.AddYears(2);
+
                     _context.Add(new Membership
                     {
-                        StartDate = DateTime.Now,
-                        EndDate = DateTime.Now.AddDays(30),
+                        StartDate = startDate,
+                        EndDate = endDate,
                         Type = MembershipType.ProMember,
                         MemberId = member.Id
                     });
