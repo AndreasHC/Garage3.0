@@ -8,11 +8,11 @@ namespace Garage3.Data
         public int Id { get; set; }
         [MaxLength(10)]
         [DisplayName("Registration Number")]
-        public string RegistrationNumber { get; set; }
+        public string RegistrationNumber { get; set; } = null!;
         [MaxLength(50)]
-        public string Color { get; set; }
+        public string Color { get; set; } = null!;
         [MaxLength(50)]
-        public string Brand { get; set; }
+        public string Brand { get; set; } = null!;
         [DisplayName("Parked Since")]
         public DateTime ParkingTime { get; set; }
 
@@ -22,5 +22,6 @@ namespace Garage3.Data
         public int OwnerId { get; set; }
         [DisplayName("Vehicle Type")]
         public VehicleType? VehicleType { get; set; }
+        
     }
 }

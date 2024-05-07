@@ -7,7 +7,7 @@ namespace Garage3.Data
     {
         public int Id { get; set; }
         [MaxLength(50)]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         [DisplayName("Number of Wheels")]
         public int NumberOfWheels { get; set; }
 

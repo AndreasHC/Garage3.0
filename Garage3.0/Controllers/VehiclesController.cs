@@ -133,7 +133,7 @@ namespace Garage3.Controllers
                     errorValue = "Member must be registered";
                 }
 
-                if (MemberHelper.GetBirthDate(owner.PersonalIdentificationNumber)?.AddYears(18) > DateTime.Today)
+                else if (MemberHelper.GetBirthDate(owner.PersonalIdentificationNumber)?.AddYears(18) > DateTime.Today)
                 {
                     problemDetected = true;
                     errorKey = "OwnerId";
@@ -284,7 +284,8 @@ namespace Garage3.Controllers
 
         public async Task<IActionResult> Receipt(Vehicle vehicle)
         {
-            string parkerName = (await _context.Members.FindAsync(vehicle.OwnerId)).FullName;
+            Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
+            string parkerName = owner.FullName;
             Receipt receipt = new Receipt(vehicle, parkerName);
             return View(receipt);
         }

@@ -39,8 +39,9 @@ namespace Garage3.Controllers
             }
 
             // Added Include p.Vehicles to connect the Vehicles with Member
+           
             var member = await _context.Members
-                .Include(p => p.Vehicles)
+                .Include(p => p.Vehicles!) // We claim that this does populate the Vehicles property with something, regardless of database state
                 .ThenInclude(v => v.VehicleType) // Include VehicleType for each Vehicle
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (member == null)

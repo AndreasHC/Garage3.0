@@ -7,19 +7,19 @@ namespace Garage3.Data
     public class Member
     {
         public int Id { get; set; }
-        
+
         [MaxLength(50)]
         [DisplayName("First Name")]
-        public string FirstName { get; set; }
-        
+        public string FirstName { get; set; } = null!;
+
         [MaxLength(50)]
         [DisplayName("Last Name")]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = null!;
 
         [MaxLength(13)]
         [RegularExpression(@"\d{8}-?\d{4}", ErrorMessage = "Not a valid Personal Id Number. Use format YYYYMMDD-NNNN.")]
         [DisplayName("Personal Id Number")]
-        public string PersonalIdentificationNumber { get; set; }
+        public string PersonalIdentificationNumber { get; set; } = null!;
 
         // Create a new read-only property for the full name
         [DisplayName("Name")]
