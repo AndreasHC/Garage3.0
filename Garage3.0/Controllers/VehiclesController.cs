@@ -362,6 +362,8 @@ namespace Garage3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
         public async Task<IActionResult> Receipt(Vehicle vehicle)
         {
             Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
@@ -443,6 +445,35 @@ namespace Garage3.Controllers
             fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
 
             return fullyOccupiedSpots >= numberOfSpots;
+        }
+
+        // GET: Vehicles/Delete/5
+        public async Task<IActionResult> Statistics()
+        {
+            var viewModel = new StatisticsViewModel
+            {
+                VehiclesCountByType = CalculateVehiclesCountByType(),
+                TotalWheelsCount = CalculateTotalWheelsCount(),
+                TotalRevenue = CalculateTotalRevenue(),
+                // Beräkna andra statistikdata...
+            };
+
+            return View(viewModel);
+        }
+
+        private decimal CalculateTotalRevenue()
+        {
+            throw new NotImplementedException();
+        }
+
+        private int CalculateTotalWheelsCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Dictionary<string, int> CalculateVehiclesCountByType()
+        {
+            throw new NotImplementedException();
         }
     }
 }
