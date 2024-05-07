@@ -13,6 +13,8 @@ namespace Garage3.Data
         public string Color { get; set; } = null!;
         [MaxLength(50)]
         public string Brand { get; set; } = null!;
+        [MaxLength(50)]
+        public string Model { get; set; } = null!;
         [DisplayName("Parked Since")]
         public DateTime ParkingTime { get; set; }
 

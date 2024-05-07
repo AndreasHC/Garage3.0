@@ -50,7 +50,7 @@ namespace Garage3.Migrations
                     b.HasIndex("PersonalIdentificationNumber")
                         .IsUnique();
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
@@ -67,6 +67,11 @@ namespace Garage3.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Model")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -91,7 +96,7 @@ namespace Garage3.Migrations
 
                     b.HasIndex("VehicleTypeId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Garage3.Data.VehicleType", b =>
@@ -115,7 +120,7 @@ namespace Garage3.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("VehicleTypes", (string)null);
+                    b.ToTable("VehicleTypes");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
