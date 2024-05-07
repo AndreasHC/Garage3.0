@@ -102,7 +102,7 @@ namespace Garage3.Controllers
                     var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
                     return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
                 })
-                .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
+                .Select(member => new { member.Id, Name = member.FullName }), "Id", "Name");
         }
 
         // POST: Vehicles/Create
