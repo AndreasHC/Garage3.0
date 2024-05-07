@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Garage3.Data
 {
@@ -7,6 +8,7 @@ namespace Garage3.Data
         public int Id { get; set; }
         [MaxLength(50)]
         public string Name { get; set; }
+        [DisplayName("Number of Wheels")]
         public int NumberOfWheels { get; set; }
 
         // Relationships
