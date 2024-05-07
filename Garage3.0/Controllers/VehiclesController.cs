@@ -9,7 +9,6 @@ using Garage3.Data;
 using Garage3.Helpers;
 using Garage3.ViewModels;
 using Garage3.Models;
-using System.Text;
 
 namespace Garage3.Controllers
 {
@@ -160,24 +159,24 @@ namespace Garage3.Controllers
                     ViewData["OwnerId"] = OwnerSelectList();
                     return View(vehicle);
                 }
+
                 VehicleType vehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId) ?? throw new InvalidDataException("Attempted to park vehicle of unregistered type.");
                 int spotSize = vehicleType.Size;
                 bool spotSizeIsInverted = vehicleType.SizeIsInverted;
-                int spot = await FindSpot(vehicleType);
+                int spot = -1;
+                for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots"); i++)
+                {
+                    if (!await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync())
+                    {
+                        spot = i; break;
+                    }
+                }
                 if (spot == -1)
                     return View("~/Views/Vehicles/Reject.cshtml");
 
                 vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
-                if (spotSizeIsInverted)
-                {
-                    _context.Add(new SpotOccupation() { SpotId = spot, VehicleId = vehicle.Id, Vehicle = vehicle });
-                }
-                else
-                {
-                    for (int i = 0; i < spotSize; i++)
-                        _context.Add(new SpotOccupation() { SpotId = spot + i, VehicleId = vehicle.Id, Vehicle = vehicle });
-                }
+                _context.Add(new SpotOccupation() { SpotId = spot , VehicleId = vehicle.Id, Vehicle = vehicle});
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
 
