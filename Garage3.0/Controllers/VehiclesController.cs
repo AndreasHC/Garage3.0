@@ -384,21 +384,6 @@ namespace Garage3.Controllers
             return _context.Vehicles.Any(e => e.Id == id);
         }
 
-        
-
-        // GET: Vehicles/Statistics
-        [HttpGet]
-        /*public async Task<IActionResult> Overview()
-        {
-            var vehicles = await _context.Vehicles.ToListAsync();
-
-            var model = new VehiclesOverview
-            {
-                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
-            };
-
-            return View();
-        }*/
         public async Task<IActionResult> Statistics()
         {
             var vehicles = _context.Vehicles
