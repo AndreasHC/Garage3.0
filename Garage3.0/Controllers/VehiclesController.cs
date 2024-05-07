@@ -24,6 +24,7 @@ namespace Garage3.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.VehicleTypeId = TypeFilterSelectList("All");
+            ViewBag.GarageIsFull = GarageIsFull();
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
         }
@@ -112,6 +113,8 @@ namespace Garage3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
+            if (GarageIsFull())
+                 return View("~/Views/Vehicles/Reject.cshtml");
             if (ModelState.IsValid)
             {
                 bool problemDetected = false;
@@ -291,6 +294,11 @@ namespace Garage3.Controllers
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
+        }
+
+        private bool GarageIsFull()
+        {
+            return _context.Vehicles.Count() >= 4;
         }
     }
 }

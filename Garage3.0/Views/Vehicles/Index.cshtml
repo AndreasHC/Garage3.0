@@ -6,9 +6,16 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Park a vehicle</a>
-</p>
+
+@if (ViewBag.GarageIsFull)
+{
+    <p>Garage is full</p>
+}
+else
+{
+    <p><a asp-action="Create">Park a vehicle</a></p>
+}
+
 <p>
     <form asp-controller="Vehicles" asp-action="Index">
         <div class="form-group">
