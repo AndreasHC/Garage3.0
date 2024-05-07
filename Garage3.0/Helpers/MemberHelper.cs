@@ -1,4 +1,6 @@
-﻿namespace Garage3.Helpers
+﻿using Garage3.Data;
+
+namespace Garage3.Helpers
 {
     public static class MemberHelper
     {
@@ -13,6 +15,20 @@
                 !int.TryParse(id.Substring(6, 2), out day)) return null;
 
             return new DateTime(year, month, day);
+        }
+
+
+        public static bool IsProMember(Member member, Membership membership)
+        {
+            ArgumentNullException.ThrowIfNull(member);
+            ArgumentNullException.ThrowIfNull(membership);
+
+            if (membership.EndDate < DateTime.Today) return true;
+            var birthDate = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
+
+            if (birthDate is null) throw new InvalidOperationException($"Unable to get birth date on member `{member.Id}`.");
+
+            return birthDate?.AddYears(65) < DateTime.Today;
         }
     }
 }
