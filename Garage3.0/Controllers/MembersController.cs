@@ -160,7 +160,7 @@ namespace Garage3.Controllers
 
                 // Validate that the given Personal Id Number is unchanged. 
                 // Find the member data from _context
-                var originalMember = await _context.Members.FindAsync(member.Id);
+                var originalMember = await _context.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Id == member.Id);
 
                 if (originalMember is null ||
                     member.PersonalIdentificationNumber != originalMember.PersonalIdentificationNumber)
