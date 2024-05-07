@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
 using Garage3.Helpers;
+using Garage3.ViewModels;
 
 namespace Garage3.Controllers
 {
@@ -87,15 +88,21 @@ namespace Garage3.Controllers
         public IActionResult Create()
         {
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
+            ViewData["OwnerId"] = OwnerSelectList();
+            return View();
+        }
+
+        private SelectList OwnerSelectList()
+        {
             var members = _context.Members.ToList(); // This retrieves all members into memory
-            ViewData["OwnerId"] = new SelectList(
+            return new SelectList(
                 members
-                .Where(member => {
+                .Where(member =>
+                {
                     var bd = MemberHelper.GetBirthDate(member.PersonalIdentificationNumber);
                     return bd.HasValue && bd.Value.AddYears(18) <= DateTime.Now.Date;
                 })
-                .Select(member => new { member.Id, Name = member.FirstName + " " + member.LastName }), "Id", "Name");
-            return View();
+                .Select(member => new { member.Id, Name = member.FullName }), "Id", "Name");
         }
 
         // POST: Vehicles/Create
@@ -107,12 +114,50 @@ namespace Garage3.Controllers
         {
             if (ModelState.IsValid)
             {
+                bool problemDetected = false;
+                string errorKey = string.Empty;
+                string errorValue = string.Empty;
+                if (_context.Vehicles.Any(m => m.RegistrationNumber == vehicle.RegistrationNumber))
+                {
+                    problemDetected = true;
+                    errorKey = "RegistrationNumber";
+                    errorValue = "Registration number must be unique";
+                }
+
+                var owner = await _context.Members.FindAsync(vehicle.OwnerId);
+                
+                if (owner == null)
+                {
+                    problemDetected = true;
+                    errorKey = "OwnerId";
+                    errorValue = "Member must be registered";
+                }
+
+                else if (MemberHelper.GetBirthDate(owner.PersonalIdentificationNumber)?.AddYears(18) > DateTime.Today)
+                {
+                    problemDetected = true;
+                    errorKey = "OwnerId";
+                    errorValue = "Member must be at least 18 years old";
+                }
+
+                if (problemDetected)
+                {
+                    ModelState.AddModelError(errorKey, errorValue);
+                    // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+                    ViewData["OwnerId"] = OwnerSelectList();
+                    return View(vehicle);
+                }
+
                 vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
+
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+            // Återställ ViewData för att behålla värdena för VehicleTypeId och OwnerId
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            ViewData["OwnerId"] = OwnerSelectList();
             return View(vehicle);
         }
 
@@ -129,10 +174,21 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
-            ViewBag.OwnerId = vehicle.OwnerId;
+
+            var selectedVehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId);
+            if (selectedVehicleType != null)
+            {
+                ViewBag.VehicleTypeName = selectedVehicleType.Name;
+            }
+            else
+            {
+                ViewBag.VehicleTypeName = ""; // Om det inte finns någon matchande VehicleType, sätt VehicleTypeName till en tom sträng
+            }
+
+            ViewData["OwnerId"] = vehicle.OwnerId;
             return View(vehicle);
         }
+
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -148,28 +204,48 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
-                    _context.Update(vehicle);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
+                    ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+
+                    ViewBag.OwnerId = vehicle.OwnerId;
+
+                    // Hämta och sätt VehicleTypeName igen
+                    ViewBag.VehicleTypeName = await _context.VehicleTypes
+                        .Where(vt => vt.Id == vehicle.VehicleTypeId)
+                        .Select(vt => vt.Name)
+                        .FirstOrDefaultAsync();
+
+                    return View(vehicle);
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(vehicle);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!VehicleExists(vehicle.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Id", vehicle.VehicleTypeId);
+
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
+            ViewBag.OwnerId = vehicle.OwnerId;
             return View(vehicle);
         }
-
         // GET: Vehicles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -180,6 +256,7 @@ namespace Garage3.Controllers
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.VehicleType)
+                .Include(v => v.Owner)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {
@@ -198,10 +275,19 @@ namespace Garage3.Controllers
             if (vehicle != null)
             {
                 _context.Vehicles.Remove(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Receipt), vehicle);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Receipt(Vehicle vehicle)
+        {
+            Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
+            string parkerName = owner.FullName;
+            Receipt receipt = new Receipt(vehicle, parkerName);
+            return View(receipt);
         }
 
         private bool VehicleExists(int id)
