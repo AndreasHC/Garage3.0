@@ -61,7 +61,7 @@ namespace Garage3.Controllers
             {
                 if (member.FirstName == member.LastName)
                 {
-                    ModelState.AddModelError(string.Empty, "Förnamnet och efternamnet kan inte vara samma.");
+                    ModelState.AddModelError(string.Empty, "First and last name must not be the same.");
                     return View(member);
                 }
 
