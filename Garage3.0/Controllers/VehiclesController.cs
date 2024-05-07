@@ -256,6 +256,7 @@ namespace Garage3.Controllers
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.VehicleType)
+                .Include(v => v.Owner)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {

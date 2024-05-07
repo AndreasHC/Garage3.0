@@ -35,11 +35,17 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.ParkingTime)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.VehicleType)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VehicleType.Id)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.VehicleType.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Owner)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Owner.FullName)
         </dd>
     </dl>
     
