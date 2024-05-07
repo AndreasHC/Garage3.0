@@ -14,10 +14,12 @@ namespace Garage3.Controllers
     public class VehiclesController : Controller
     {
         private readonly GarageContext _context;
+        private readonly IConfiguration _configuration;
 
-        public VehiclesController(GarageContext context)
+        public VehiclesController(GarageContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: Vehicles
@@ -298,7 +300,7 @@ namespace Garage3.Controllers
 
         private bool GarageIsFull()
         {
-            return _context.Vehicles.Count() >= 4;
+            return _context.Vehicles.Count() >= _configuration.GetValue<int>("AppSettings:NumberOfSpots");
         }
     }
 }
