@@ -123,11 +123,18 @@ namespace Garage3.Controllers
                 return NotFound();
             }
 
-            var vehicleType = await _context.VehicleTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vehicleType == null)
+            var vehicleType = await _context.VehicleTypes.FindAsync(id);
+
+            if (vehicleType is null)
             {
                 return NotFound();
+            }
+
+            var vehicles = await _context.Vehicles.Where(v => v.VehicleTypeId == vehicleType.Id).ToListAsync();
+            if (vehicles.Any())
+            {
+                ModelState.AddModelError("", $"This item cannot be deleted because there are one or more vehicles that are {vehicleType.Name}.");
+                return View(vehicleType);
             }
 
             return View(vehicleType);
@@ -139,11 +146,21 @@ namespace Garage3.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var vehicleType = await _context.VehicleTypes.FindAsync(id);
-            if (vehicleType != null)
+
+            if (vehicleType is null)
             {
-                _context.VehicleTypes.Remove(vehicleType);
+                return NotFound();
             }
 
+            var vehicles = await _context.Vehicles.Where(v => v.VehicleTypeId == vehicleType.Id).ToListAsync();
+
+            if (vehicles.Any())
+            {
+                ModelState.AddModelError("", $"This item cannot be deleted because there are one or more vehicles that are {vehicleType.Name}.");
+                return View(vehicleType);
+            }
+
+            _context.VehicleTypes.Remove(vehicleType);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -10,24 +10,33 @@
 <div>
     <h4>VehicleType</h4>
     <hr />
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger" role="alert">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        </div>
+    }
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-3">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-8">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-3">
             @Html.DisplayNameFor(model => model.NumberOfWheels)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-8">
             @Html.DisplayFor(model => model.NumberOfWheels)
         </dd>
     </dl>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        @if (ViewData.ModelState.IsValid)
+        {
+        <input type="submit" value="Delete" class="btn btn-danger mr-1" />
+        }
         <a asp-action="Index">Back to List</a>
     </form>
 </div>
