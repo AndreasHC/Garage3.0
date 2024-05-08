@@ -12,6 +12,5 @@ namespace Garage3.ViewModels
 
         [DisplayName("Total Revenue")]
         public decimal TotalRevenue { get; set; }
-
     }
 }
