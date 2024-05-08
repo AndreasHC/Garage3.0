@@ -256,6 +256,7 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
+      
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -375,7 +376,21 @@ namespace Garage3.Controllers
             return _context.Vehicles.Any(e => e.Id == id);
         }
 
-        // GET: Vehicles/Delete/5
+        
+
+        // GET: Vehicles/Statistics
+        [HttpGet]
+        /*public async Task<IActionResult> Overview()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+
+            var model = new VehiclesOverview
+            {
+                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
+            };
+
+            return View();
+        }*/
         public async Task<IActionResult> Statistics()
         {
             var viewModel = new StatisticsViewModel
@@ -401,18 +416,38 @@ namespace Garage3.Controllers
             return revenues;
         }
 
-        private Task<int> CalculateTotalWheelsCount()
+        private async Task<int> CalculateTotalWheelsCount()
         {
-            throw new NotImplementedException();
+            //  throw new NotImplementedException();
+            int totalWheels = 0;
+
+            // .Include(p => p.VehiclesTypes!)
+
+            var vehicles = _context.Vehicles
+                .Include(p => p.VehicleType!);
+                
+
+            foreach(var vehicle in vehicles)
+            {
+                totalWheels += vehicle.VehicleType.NumberOfWheels;
+               // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
+            }
+
+            return totalWheels;
         }
 
-        private async Task<Dictionary<int, int>> CalculateVehiclesCountByType()
+        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
         {
-            Dictionary<int,int> result = new();
+            Dictionary<string,int> result = new();
 
-            await foreach (var vehicle in _context.Vehicles)
+            var vehicles = _context.Vehicles
+                .Include(v => v.VehicleType)
+                .Select(v => v)
+                ;
+
+            foreach (var vehicle in vehicles)
             {
-                var type = vehicle.VehicleTypeId;
+                var type = vehicle.VehicleType.Name;
                 if (result.ContainsKey(type))
                 {
                     result[type]++;
@@ -424,23 +459,6 @@ namespace Garage3.Controllers
             }
 
             return result;
-        }
-
-        private async Task<bool> GarageIsFull()
-        {
-            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
-            // find all small sizes currently in use
-            var smallSizes = await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted).GroupBy(v => v.VehicleType.Size).Select(group => group.Key).ToListAsync();
-            int fullyOccupiedSpots = 0;
-            foreach (int size in smallSizes)
-            {
-                // count (minimal) number of spots required to hold all small vehicles of this size (number of spots used may be larger)
-                fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted & v.VehicleType.Size == size).CountAsync() / size;
-            }
-            // count number of spots used to hold non-small vehicles
-            fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
-
-            return fullyOccupiedSpots >= numberOfSpots;
         }
     }
 }
