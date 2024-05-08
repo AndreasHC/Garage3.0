@@ -110,6 +110,12 @@ namespace Garage3.Migrations
                     b.Property<int>("NumberOfWheels")
                         .HasColumnType("int");
 
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("SizeIsInverted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
