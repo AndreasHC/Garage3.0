@@ -294,7 +294,6 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
-      
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
