@@ -70,7 +70,7 @@
                 <span class="tooltip" style="bottom: @(spot.Value ? "-270%" : "120%")">
                    
                     Parking Number: @spot.Key <br>
-                    Status: @(spot.Value ? "Upptagen" : "Ledig")
+                    Status: @(spot.Value ? "Busy" : "Free")
                     @if (spot.Value) // Check if the spot is occupied
                     {
                         <br>
