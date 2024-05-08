@@ -26,7 +26,7 @@ upphör enligt Pros prisplan resterande enligt ordinarie taxa.
             double baseModifier = 1.0;
             double hourlyModifer = 1.0;
             double reduction = 1.0;
-            double parkingDuration = (int)(DateTime.Today - startDate).TotalHours;
+            double parkingDuration = (int)(DateTime.Now - startDate).TotalHours;
 
             if (!vehicleType.SizeIsInverted)
             {
@@ -61,7 +61,7 @@ upphör enligt Pros prisplan resterande enligt ordinarie taxa.
 
             double cost = 10 * baseModifier + 10 * hourlyModifer * parkingDuration;
 
-            return (int)(cost / reduction);
+            return (int)(cost * (1 - reduction));
         }
     }
 }

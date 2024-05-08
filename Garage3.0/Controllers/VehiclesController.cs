@@ -356,7 +356,7 @@ namespace Garage3.Controllers
         {
             Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
             string parkerName = owner.FullName;
-            Receipt receipt = new Receipt(vehicle, parkerName);
+            Receipt receipt = new Receipt(owner, vehicle, parkerName);
             return View(receipt);
         }
 
@@ -412,7 +412,7 @@ namespace Garage3.Controllers
 
             await foreach (var vehicle in _context.Vehicles)
             {
-                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+                revenues += VehiclesHelper.GetParkingCost(vehicle.Owner, vehicle.VehicleType, vehicle.ParkingTime);
             }
 
             return revenues;
