@@ -6,7 +6,7 @@
 
 <h1>Index</h1>
 
-@if (ViewBag.GarageIsFull)
+@if (ViewBag.GarageIsFull != null && ViewBag.GarageIsFull)
 {
     <p>Garage is full</p>
 }
@@ -14,13 +14,13 @@ else
 {
     <p><a asp-action="Create">Park a vehicle</a></p>
 }
-
-<p>
-    <a asp-action="Spaces">Occupancy</a>
-</p>
 <div>
     <span>@await Html.PartialAsync("Spaces.cshtml")</span>
 </div>
+<p>
+    <a asp-action="Spaces">Occupancy</a>
+</p>
+
 <p>
     <a asp-action="Statistics">Statistics</a>
 </p>
