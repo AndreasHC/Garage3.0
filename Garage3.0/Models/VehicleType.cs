@@ -13,6 +13,9 @@ namespace Garage3.Data
         [DisplayName("Number of Wheels")]
         [Range(0, int.MaxValue)]
         public int NumberOfWheels { get; set; }
+        public int Size {  get; set; }
+        [DisplayName("Size is Vehicles per Spot")]
+        public bool SizeIsInverted { get; set; }
 
         // Relationships
         public List<Vehicle>? Vehicles { get; set; }

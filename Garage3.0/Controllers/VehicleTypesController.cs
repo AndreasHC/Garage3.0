@@ -53,7 +53,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,NumberOfWheels")] VehicleType vehicleType)
+        public async Task<IActionResult> Create([Bind("Id,Name,NumberOfWheels,Size,SizeIsInverted")] VehicleType vehicleType)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +85,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,NumberOfWheels")] VehicleType vehicleType)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,NumberOfWheels,Size,SizeIsInverted")] VehicleType vehicleType)
         {
             if (id != vehicleType.Id)
             {
