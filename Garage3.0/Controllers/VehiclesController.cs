@@ -189,19 +189,7 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
-        // GET: Garage/Overview
-        [HttpGet]
-        public async Task<IActionResult> Overview()
-        {
-            var vehicles = await _context.Vehicles.ToListAsync();
-
-            var model = new VehiclesOverview
-            {
-                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
-            };
-
-            return View();              
-        }
+      
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -308,7 +296,21 @@ namespace Garage3.Controllers
             return _context.Vehicles.Any(e => e.Id == id);
         }
 
-        // GET: Vehicles/Delete/5
+        
+
+        // GET: Vehicles/Statistics
+        [HttpGet]
+        /*public async Task<IActionResult> Overview()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+
+            var model = new VehiclesOverview
+            {
+                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
+            };
+
+            return View();
+        }*/
         public async Task<IActionResult> Statistics()
         {
             var viewModel = new StatisticsViewModel
@@ -334,18 +336,33 @@ namespace Garage3.Controllers
             return revenues;
         }
 
-        private Task<int> CalculateTotalWheelsCount()
+        private async Task<int> CalculateTotalWheelsCount()
         {
-            throw new NotImplementedException();
+            //  throw new NotImplementedException();
+            int totalWheels = 0;
+
+            // .Include(p => p.VehiclesTypes!)
+
+            var vehicles = _context.Vehicles
+                .Include(p => p.VehicleType!);
+                
+
+            foreach(var vehicle in vehicles)
+            {
+                totalWheels += vehicle.VehicleType.NumberOfWheels;
+               // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
+            }
+
+            return totalWheels;
         }
 
-        private async Task<Dictionary<int, int>> CalculateVehiclesCountByType()
+        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
         {
-            Dictionary<int,int> result = new();
+            Dictionary<string,int> result = new();
 
             await foreach (var vehicle in _context.Vehicles)
             {
-                var type = vehicle.VehicleTypeId;
+                var type = vehicle.VehicleType.Name;
                 if (result.ContainsKey(type))
                 {
                     result[type]++;
