@@ -9,6 +9,7 @@ using Garage3.Data;
 using Garage3.Helpers;
 using Garage3.ViewModels;
 using Garage3.Models;
+using System.Text;
 
 namespace Garage3.Controllers
 {
