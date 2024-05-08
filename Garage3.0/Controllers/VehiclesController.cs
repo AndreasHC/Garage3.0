@@ -165,9 +165,9 @@ namespace Garage3.Controllers
                 int spotSize = vehicleType.Size;
                 bool spotSizeIsInverted = vehicleType.SizeIsInverted;
                 int spot = -1;
-                for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots"); i++)
+                for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots") - spotSize + 1; i++)
                 {
-                    if (!await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync())
+                    if (!await _context.SpotOccupations.Where(s => (s.SpotId >= i) & (s.SpotId < i + spotSize)).AnyAsync())
                     {
                         spot = i; break;
                     }
@@ -177,7 +177,8 @@ namespace Garage3.Controllers
 
                 vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
-                _context.Add(new SpotOccupation() { SpotId = spot , VehicleId = vehicle.Id, Vehicle = vehicle});
+                for (int i = 0; i<spotSize;i++)
+                    _context.Add(new SpotOccupation() { SpotId = spot + i , VehicleId = vehicle.Id, Vehicle = vehicle});
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
 
