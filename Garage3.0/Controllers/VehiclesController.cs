@@ -165,11 +165,39 @@ namespace Garage3.Controllers
                 int spotSize = vehicleType.Size;
                 bool spotSizeIsInverted = vehicleType.SizeIsInverted;
                 int spot = -1;
-                for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots") - spotSize + 1; i++)
+                if (spotSizeIsInverted)
                 {
-                    if (!await _context.SpotOccupations.Where(s => (s.SpotId >= i) & (s.SpotId < i + spotSize)).AnyAsync())
+                    // Try to find a spot occupied by vehicles of the same size, but not to capacity
+                    var  spotsOccupiedByRightSize = await _context.SpotOccupations.Include(o => o.Vehicle).ThenInclude(v => v.VehicleType).Where(o => o.Vehicle.VehicleType.SizeIsInverted && o.Vehicle.VehicleType.Size == spotSize).Select(o => o.SpotId).ToListAsync();
+                    foreach (int spotToConsider in spotsOccupiedByRightSize)
                     {
-                        spot = i; break;
+                        if (await _context.SpotOccupations.Where(o => o.SpotId == spotToConsider).CountAsync() < spotSize)
+                        {
+                            spot = spotToConsider; break;
+                        }
+                    }
+                    // Try for empty spot
+                    if (spot == -1)
+                    {
+                        for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots"); i++)
+                        {
+                            if (!await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync())
+                            {
+                                spot = i; break;
+                            }
+                        }
+                    }
+
+                }
+
+                else
+                {
+                    for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots") - spotSize + 1; i++)
+                    {
+                        if (!await _context.SpotOccupations.Where(s => (s.SpotId >= i) & (s.SpotId < i + spotSize)).AnyAsync())
+                        {
+                            spot = i; break;
+                        }
                     }
                 }
                 if (spot == -1)
@@ -177,8 +205,15 @@ namespace Garage3.Controllers
 
                 vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
-                for (int i = 0; i<spotSize;i++)
-                    _context.Add(new SpotOccupation() { SpotId = spot + i , VehicleId = vehicle.Id, Vehicle = vehicle});
+                if (spotSizeIsInverted)
+                {
+                    _context.Add(new SpotOccupation() { SpotId = spot, VehicleId = vehicle.Id, Vehicle = vehicle });
+                }
+                else
+                {
+                    for (int i = 0; i < spotSize; i++)
+                        _context.Add(new SpotOccupation() { SpotId = spot + i, VehicleId = vehicle.Id, Vehicle = vehicle });
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
 
