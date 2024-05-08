@@ -357,6 +357,19 @@ namespace Garage3.Controllers
             return View(receipt);
         }
 
+        public async Task<IActionResult> Spaces()
+        {
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            Dictionary<int, bool> result = new Dictionary<int, bool>();
+            for (int i = 0; i < numberOfSpots; i++)
+            {
+                result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
+            }
+            ViewBag.OccupancyDict = result;
+            ViewBag.NumberOfSpots = numberOfSpots;
+            return View();
+        }
+
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
