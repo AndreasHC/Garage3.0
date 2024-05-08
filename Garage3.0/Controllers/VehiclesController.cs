@@ -217,7 +217,7 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber != vehicle.RegistrationNumber))
                 {
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
@@ -232,23 +232,21 @@ namespace Garage3.Controllers
 
                     return View(vehicle);
                 }
-                else
+
+                try
                 {
-                    try
+                    _context.Update(vehicle);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!VehicleExists(vehicle.Id))
                     {
-                        _context.Update(vehicle);
-                        await _context.SaveChangesAsync();
+                        return NotFound();
                     }
-                    catch (DbUpdateConcurrencyException)
+                    else
                     {
-                        if (!VehicleExists(vehicle.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 }
 
@@ -295,6 +293,8 @@ namespace Garage3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
         public async Task<IActionResult> Receipt(Vehicle vehicle)
         {
             Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
@@ -306,6 +306,57 @@ namespace Garage3.Controllers
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
+        }
+
+        // GET: Vehicles/Delete/5
+        public async Task<IActionResult> Statistics()
+        {
+            var viewModel = new StatisticsViewModel
+            {
+                VehicleCountByType = await CalculateVehiclesCountByType(),
+                TotalWheelsCount = await CalculateTotalWheelsCount(),
+                TotalRevenue = await CalculateTotalRevenue(),
+            };
+
+            return View(viewModel);
+        }
+
+        private async Task<decimal> CalculateTotalRevenue()
+        {
+            decimal revenues = 0;
+            DateTime now = DateTime.Now;
+
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+            }
+
+            return revenues;
+        }
+
+        private Task<int> CalculateTotalWheelsCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<Dictionary<int, int>> CalculateVehiclesCountByType()
+        {
+            Dictionary<int,int> result = new();
+
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                var type = vehicle.VehicleTypeId;
+                if (result.ContainsKey(type))
+                {
+                    result[type]++;
+                }
+                else
+                {
+                    result[type] = 1;
+                }
+            }
+
+            return result;
         }
     }
 }
