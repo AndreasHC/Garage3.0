@@ -6,7 +6,6 @@
 
 <h1>Index</h1>
 
-
 @if (ViewBag.GarageIsFull)
 {
     <p>Garage is full</p>
@@ -15,23 +14,27 @@ else
 {
     <p><a asp-action="Create">Park a vehicle</a></p>
 }
+
 <p>
     <a asp-action="Spaces">Occupancy</a>
 </p>
-
+<div>
+    <span />@await Html.PartialAsync("Spaces.cshtml")</span>
+</div>
 <p>
     <form asp-controller="Vehicles" asp-action="Index">
         <div class="form-group">
             <label>@Html.DisplayNameFor(model => model.VehicleType)</label>
-            <select asp-items="ViewBag.VehicleTypeId" name ="soughtVehicleType"></select>
+            <select asp-items="ViewBag.VehicleTypeId" name="soughtVehicleType"></select>
         </div>
         <div>
             <label>@Html.DisplayNameFor(model => model.RegistrationNumber)</label>
-            <input name="soughtRegistrationNumber" value="@ViewBag.RegistrationNumber"/>
+            <input name="soughtRegistrationNumber" value="@ViewBag.RegistrationNumber" />
         </div>
         <button>Filter</button>
     </form>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -60,19 +63,20 @@ else
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.RegistrationNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Color)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Brand)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ParkingTime)
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RegistrationNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Color)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Brand)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ParkingTime)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.VehicleType.Name)
@@ -83,12 +87,14 @@ else
                 <td>
                     @Html.DisplayFor(modelItem => item.Owner.MembershipType)
                 </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Collect</a>
-            </td>
-        </tr>
-}
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Collect</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+

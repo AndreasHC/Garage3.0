@@ -29,6 +29,8 @@ namespace Garage3.Controllers
         {
             ViewBag.VehicleTypeId = TypeFilterSelectList("All");
             ViewBag.GarageIsFull = await GarageIsFull();
+            // Call the Spaces action to get occupancy data
+            await Spaces();
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
         }
