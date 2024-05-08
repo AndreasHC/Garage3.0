@@ -75,7 +75,8 @@ namespace Garage3.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("MemberId")
+                        .IsUnique();
 
                     b.ToTable("MemberShip");
                 });
@@ -137,6 +138,12 @@ namespace Garage3.Migrations
                     b.Property<int>("NumberOfWheels")
                         .HasColumnType("int");
 
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("SizeIsInverted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -145,11 +152,24 @@ namespace Garage3.Migrations
                     b.ToTable("VehicleTypes");
                 });
 
+            modelBuilder.Entity("Garage3.Models.SpotOccupation", b =>
+                {
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpotId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VehicleId", "SpotId");
+
+                    b.ToTable("SpotOccupations");
+                });
+
             modelBuilder.Entity("Garage3.Data.Membership", b =>
                 {
                     b.HasOne("Garage3.Data.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
+                        .WithOne("Membership")
+                        .HasForeignKey("Garage3.Data.Membership", "MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -175,8 +195,22 @@ namespace Garage3.Migrations
                     b.Navigation("VehicleType");
                 });
 
+            modelBuilder.Entity("Garage3.Models.SpotOccupation", b =>
+                {
+                    b.HasOne("Garage3.Data.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Garage3.Data.Member", b =>
                 {
+                    b.Navigation("Membership")
+                        .IsRequired();
+
                     b.Navigation("Vehicles");
                 });
 
