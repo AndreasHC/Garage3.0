@@ -1,4 +1,6 @@
-﻿namespace Garage3.Helpers
+﻿using Garage3.Data;
+
+namespace Garage3.Helpers
 {
     public static class MemberHelper
     {
@@ -13,6 +15,11 @@
                 !int.TryParse(id.Substring(6, 2), out day)) return null;
 
             return new DateTime(year, month, day);
+        }
+
+        internal static string Format(MembershipType value)
+        {
+            return Enum.GetName(typeof(MembershipType), value)?.Replace('_', ' ')!;
         }
     }
 }

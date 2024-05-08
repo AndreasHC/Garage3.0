@@ -22,12 +22,26 @@
         <dd class="col-sm-8">
             @Html.DisplayFor(model => model.LastName)
         </dd>
-    
         <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.PersonalIdentificationNumber)
         </dt>
         <dd class="col-sm-8">
             @Html.DisplayFor(model => model.PersonalIdentificationNumber)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.MembershipType)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.MembershipType)
+            <span>
+                @if (Model.Membership.EndDate >= DateTime.Today)
+                {
+                    var changedDate = Model.Membership.EndDate.AddDays(-2);
+                    @* var remainingDays = (Model.Membership.EndDate - DateTime.Today).TotalDays; *@
+                    var remainingDays = (changedDate - DateTime.Today).TotalDays;
+                    @($"{remainingDays} days remaining")
+                }
+            </span>
         </dd>
         <dt class="col-sm-3">
             <p>Vehicles Count</p>

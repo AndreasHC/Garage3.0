@@ -1,13 +1,15 @@
-﻿using System.ComponentModel;
+﻿using Garage3.Helpers;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Garage3.Data
 {
     public enum MembershipType
     {
-        RegularMember,
-        ProMember
+        Regular_Member,
+        Pro_Member
     }
 
     public class Membership
@@ -46,13 +48,13 @@ namespace Garage3.Data
         [DisplayName("Name")]
         public string FullName => $"{FirstName} {LastName}";
 
-        // Read-only property for now.
+        // Create a read-only property for the Membership Type
         [DisplayName("Membership Type")]
-        public string MembershipType => "Ordinary";
+        public string MembershipType => Membership.EndDate < DateTime.Today ? MemberHelper.Format(Data.MembershipType.Regular_Member) : MemberHelper.Format(Data.MembershipType.Pro_Member);
 
         // Relationships
-        public List<Vehicle>? Vehicles { get; set; }
+        public Membership Membership { get; set; }
 
-       
+        public List<Vehicle>? Vehicles { get; set; }
     }
 }

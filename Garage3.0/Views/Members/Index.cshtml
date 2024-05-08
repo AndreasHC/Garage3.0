@@ -22,6 +22,9 @@
                 @Html.DisplayNameFor(model => model.PersonalIdentificationNumber)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.MembershipType)
+            </th>
+            <th>
                 Vehicles Count
             </th>
             <th></th>
@@ -40,6 +43,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.PersonalIdentificationNumber)
             </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MembershipType)
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Vehicles.Count)
                 </td>
