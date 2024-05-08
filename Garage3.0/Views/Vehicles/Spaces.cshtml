@@ -61,31 +61,35 @@
 
 
 <div class="parking-container">
-    @foreach (var spot in ViewBag.OccupancyDict)
+    @if (ViewBag.OccupancyDict != null)
     {
-        <div class="parking-spot @(spot.Value ? "spot-red" : "spot-green")">
-            @spot.Key
-            <span class="tooltip" style="bottom: @(spot.Value ? "-270%" : "120%")"> <!-- Villkorlig bottom-stil -->
-                Platsnummer: @spot.Key <br>
-                Status: @(spot.Value ? "Upptagen" : "Ledig")
-                @if (spot.Value) // Check if the spot is occupied
-                {
-                    <br>
-                    <br>
-                    @if (ViewBag.RegistrationNumbers.ContainsKey(spot.Key) && ViewBag.RegistrationNumbers[spot.Key].Count > 0) 
+        @foreach (var spot in ViewBag.OccupancyDict)
+        {
+            <div class="parking-spot @(spot.Value ? "spot-red" : "spot-green")">
+                @spot.Key
+                <span class="tooltip" style="bottom: @(spot.Value ? "-270%" : "120%")">
+                   
+                    Parking Number: @spot.Key <br>
+                    Status: @(spot.Value ? "Upptagen" : "Ledig")
+                    @if (spot.Value) // Check if the spot is occupied
                     {
-                        @foreach (var registrationNumber in ViewBag.RegistrationNumbers[spot.Key]) 
+                        <br>
+                        <br>
+                        @if (ViewBag.RegistrationNumbers != null && ViewBag.RegistrationNumbers.ContainsKey(spot.Key) && ViewBag.RegistrationNumbers[spot.Key].Count > 0)
                         {
-                            <div>Reg Number: @registrationNumber</div>
+                            @foreach (var registrationNumber in ViewBag.RegistrationNumbers[spot.Key])
+                            {
+                                <div>Reg Number: @registrationNumber</div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No registration numbers found</div>
                         }
                     }
-                    else
-                    {
-                        <div>No registration numbers found</div> 
-                    }
-                }
-            </span>
-        </div>
+                </span>
+            </div>
+        }
     }
 </div>
 
