@@ -100,6 +100,9 @@ namespace Garage3.Controllers
                 }
                 else
                 {
+                    _context.Add(member);
+                    await _context.SaveChangesAsync();
+
                     var startDate = DateTime.Today;
                     var endDate = (birthDate?.AddYears(65) < DateTime.Today) ? startDate.AddDays(30) : startDate.AddYears(2);
 
@@ -110,8 +113,6 @@ namespace Garage3.Controllers
                         Type = MembershipType.ProMember,
                         MemberId = member.Id
                     });
-
-                    _context.Add(member);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
