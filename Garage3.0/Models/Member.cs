@@ -17,7 +17,7 @@ namespace Garage3.Data
         public int Id { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public MembershipType Type { get; set; }    // Regular, Pro
+        public MembershipType Type { get; set; }    // Regular_Member, Pro_Member
 
         // Navigation property to member
         public Member Member { get; set; }
