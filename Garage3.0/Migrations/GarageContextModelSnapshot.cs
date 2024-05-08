@@ -53,6 +53,33 @@ namespace Garage3.Migrations
                     b.ToTable("Members");
                 });
 
+            modelBuilder.Entity("Garage3.Data.Membership", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("MemberShip");
+                });
+
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -121,6 +148,17 @@ namespace Garage3.Migrations
                         .IsUnique();
 
                     b.ToTable("VehicleTypes");
+                });
+
+            modelBuilder.Entity("Garage3.Data.Membership", b =>
+                {
+                    b.HasOne("Garage3.Data.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
