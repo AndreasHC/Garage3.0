@@ -360,7 +360,12 @@ namespace Garage3.Controllers
         {
             Dictionary<string,int> result = new();
 
-            await foreach (var vehicle in _context.Vehicles)
+            var vehicles = _context.Vehicles
+                .Include(v => v.VehicleType)
+                .Select(v => v)
+                ;
+
+            foreach (var vehicle in vehicles)
             {
                 var type = vehicle.VehicleType.Name;
                 if (result.ContainsKey(type))
