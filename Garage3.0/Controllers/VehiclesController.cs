@@ -442,12 +442,9 @@ namespace Garage3.Controllers
         {
             Dictionary<string,int> result = new();
 
-            var vehicles = _context.Vehicles
-                .Include(v => v.VehicleType)
-                .Select(v => v)
-                ;
+            var vehicles = _context.Vehicles.Include(v => v.VehicleType).AsAsyncEnumerable();
 
-            foreach (var vehicle in vehicles)
+            await foreach (var vehicle in vehicles)
             {
                 var type = vehicle.VehicleType.Name;
                 if (result.ContainsKey(type))
