@@ -17,8 +17,18 @@ namespace Garage3.Helpers
             return new DateTime(year, month, day);
         }
 
-        internal static string Format(MembershipType value)
+        internal static string DisplayMemberType(DateTime endDate)
         {
+            return FormatMembershipType(endDate <= DateTime.Today ? MembershipType.Pro_Member : MembershipType.Regular_Member);
+        }
+
+        internal static string FormatMembershipType(MembershipType value)
+        {
+            if (value < MembershipType.Pro_Member || value > MembershipType.Regular_Member)
+            {
+                throw new ArgumentException($"Illegal value `{value}`");
+            }
+
             return Enum.GetName(typeof(MembershipType), value)?.Replace('_', ' ')!;
         }
     }

@@ -19,7 +19,7 @@ namespace Garage3.Controllers
         {
            var members = await _context.Members
                 .Include(p => p.Vehicles!) // We claim that this does populate the Vehicles property with something, regardless of database state
-                .Include(m => m.Membership)
+                //.Include(m => m.Membership)
                 .OrderBy(p => EF.Functions.Collate(p.FirstName.Substring(0, 2), "Latin1_General_BIN")).ToListAsync();
             return View(members);
         }
@@ -38,7 +38,7 @@ namespace Garage3.Controllers
             var member = await _context.Members
                 .Include(p => p.Vehicles!) // We claim that this does populate the Vehicles property with something, regardless of database state
                 .ThenInclude(v => v.VehicleType) // Include VehicleType for each Vehicle
-                .Include(m => m.Membership)
+                //.Include(m => m.Membership)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (member == null)
             {
@@ -104,20 +104,13 @@ namespace Garage3.Controllers
                 }
                 else
                 {
+                    DateTime startDate = DateTime.Today;
+                    member.StartDate = startDate;
+                    member.EndDate = (birthDate?.AddYears(65) < DateTime.Today) ? startDate.AddDays(30) : startDate.AddYears(2);
+
                     _context.Add(member);
                     await _context.SaveChangesAsync();
 
-                    var startDate = DateTime.Today;
-                    var endDate = (birthDate?.AddYears(65) < DateTime.Today) ? startDate.AddDays(30) : startDate.AddYears(2);
-
-                    _context.Add(new Membership
-                    {
-                        StartDate = startDate,
-                        EndDate = endDate,
-                        Type = MembershipType.Pro_Member,
-                        MemberId = member.Id
-                    });
-                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }

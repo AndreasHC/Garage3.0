@@ -1,4 +1,5 @@
 ﻿using Garage3.Helpers;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
@@ -8,23 +9,8 @@ namespace Garage3.Data
 {
     public enum MembershipType
     {
-        Regular_Member,
-        Pro_Member
-    }
-
-    public class Membership
-    {
-        public int Id { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public MembershipType Type { get; set; }    // Regular_Member, Pro_Member
-
-        // Navigation property to member
-        public Member Member { get; set; }
-
-        // Foreign key to Member
-        public int MemberId { get; set; }
-
+        Regular_Member = 1,
+        Pro_Member = 2
     }
 
     public class Member
@@ -44,20 +30,22 @@ namespace Garage3.Data
         [DisplayName("Personal Id Number")]
         public string PersonalIdentificationNumber { get; set; } = null!;
 
+        // Membership Info
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        // Readonly property for membership
+        [DisplayName("Membership Type")]
+        public string MembershipType => MemberHelper.DisplayMemberType(EndDate);
+
+        [DisplayName("Membership Days Left")]
+        public double MembershipDaysLeft => (EndDate - DateTime.Today).TotalDays;
+
         // Create a new read-only property for the full name
         [DisplayName("Name")]
         public string FullName => $"{FirstName} {LastName}";
 
-        // Create a read-only property for the Membership Type
-        [DisplayName("Membership Type")]
-        public string MembershipType => Membership != null && 
-            Membership.EndDate < DateTime.Today ? 
-            MemberHelper.Format(Data.MembershipType.Regular_Member) : 
-            MemberHelper.Format(Data.MembershipType.Pro_Member);
-
         // Relationships
-        public Membership Membership { get; set; }
-
         public List<Vehicle>? Vehicles { get; set; }
     }
 }

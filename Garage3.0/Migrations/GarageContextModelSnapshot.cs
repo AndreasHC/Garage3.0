@@ -30,6 +30,9 @@ namespace Garage3.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -45,40 +48,15 @@ namespace Garage3.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PersonalIdentificationNumber")
                         .IsUnique();
 
                     b.ToTable("Members");
-                });
-
-            modelBuilder.Entity("Garage3.Data.Membership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId")
-                        .IsUnique();
-
-                    b.ToTable("MemberShip");
                 });
 
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
@@ -165,17 +143,6 @@ namespace Garage3.Migrations
                     b.ToTable("SpotOccupations");
                 });
 
-            modelBuilder.Entity("Garage3.Data.Membership", b =>
-                {
-                    b.HasOne("Garage3.Data.Member", "Member")
-                        .WithOne("Membership")
-                        .HasForeignKey("Garage3.Data.Membership", "MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-                });
-
             modelBuilder.Entity("Garage3.Data.Vehicle", b =>
                 {
                     b.HasOne("Garage3.Data.Member", "Owner")
@@ -208,9 +175,6 @@ namespace Garage3.Migrations
 
             modelBuilder.Entity("Garage3.Data.Member", b =>
                 {
-                    b.Navigation("Membership")
-                        .IsRequired();
-
                     b.Navigation("Vehicles");
                 });
 

@@ -9,7 +9,6 @@ namespace Garage3.Data
         public GarageContext(DbContextOptions<GarageContext> options)
         : base(options) { }
 
-        public DbSet<Membership> MemberShip => Set<Membership>();
         public DbSet<Member> Members => Set<Member>();
         public DbSet<Vehicle> Vehicles => Set<Vehicle>();
         public DbSet<VehicleType> VehicleTypes => Set<VehicleType>();
