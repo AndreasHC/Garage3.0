@@ -364,18 +364,58 @@ namespace Garage3.Controllers
             return View(receipt);
         }
 
+        //public async Task<IActionResult> Spaces()
+        //{
+        //    int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+        //    Dictionary<int, bool> result = new Dictionary<int, bool>();
+        //    //var spots =  _context.SpotOccupations.Include(a => a.Vehicle).Select(Vehicle);
+
+        //    for (int i = 0; i < numberOfSpots; i++)
+        //    {
+        //        result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
+        //    }
+        //    ViewBag.OccupancyDict = result;
+        //    ViewBag.NumberOfSpots = numberOfSpots;
+
+        //    return View();
+        //}
+
         public async Task<IActionResult> Spaces()
         {
             int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
             Dictionary<int, bool> result = new Dictionary<int, bool>();
+            Dictionary<int, List<string>> registrationNumbersDict = new Dictionary<int, List<string>>(); // Ändra till Dictionary
+
             for (int i = 0; i < numberOfSpots; i++)
             {
-                result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
+                bool isOccupied = await _context.SpotOccupations
+                    .AnyAsync(s => s.SpotId == i && s.Vehicle != null);
+
+                result[i] = isOccupied;
+
+                if (isOccupied)
+                {
+                    // If spot is occupied, fetch the registration numbers and add them to the dictionary
+                    var registrationNumbers = await _context.SpotOccupations
+                        .Where(s => s.SpotId == i && s.Vehicle != null)
+                        .Select(s => s.Vehicle.RegistrationNumber)
+                        .ToListAsync(); // Hämta en lista med registreringsnummer för den aktuella platsen
+
+                    registrationNumbersDict[i] = registrationNumbers; // Lägg till registreringsnummer i dictionary
+                }
             }
+
             ViewBag.OccupancyDict = result;
             ViewBag.NumberOfSpots = numberOfSpots;
-            return View();
+            ViewBag.RegistrationNumbers = registrationNumbersDict; // Uppdatera ViewBag.RegistrationNumbers till att använda dictionary
+
+            // Pass a list of vehicles to the view
+            var vehicles = await _context.Vehicles.ToListAsync();
+            return View(vehicles);
         }
+
+
+
 
         private bool VehicleExists(int id)
         {
