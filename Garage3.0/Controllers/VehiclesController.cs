@@ -459,5 +459,22 @@ namespace Garage3.Controllers
 
             return result;
         }
+
+        private async Task<bool> GarageIsFull()
+        {
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            // find all small sizes currently in use
+            var smallSizes = await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted).GroupBy(v => v.VehicleType.Size).Select(group => group.Key).ToListAsync();
+            int fullyOccupiedSpots = 0;
+            foreach (int size in smallSizes)
+            {
+                // count (minimal) number of spots required to hold all small vehicles of this size (number of spots used may be larger)
+                fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted & v.VehicleType.Size == size).CountAsync() / size;
+            }
+            // count number of spots used to hold non-small vehicles
+            fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
+
+            return fullyOccupiedSpots >= numberOfSpots;
+        }
     }
 }
