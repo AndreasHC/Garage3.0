@@ -12,6 +12,5 @@ namespace Garage3.ViewModels
 
         [DisplayName("Total Amount of Wheels")]
         public decimal TotalRevenue { get; set; }
-
     }
 }
