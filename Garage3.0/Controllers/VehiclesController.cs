@@ -258,6 +258,7 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
+      
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -273,7 +274,7 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber != vehicle.RegistrationNumber))
                 {
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
@@ -288,23 +289,21 @@ namespace Garage3.Controllers
 
                     return View(vehicle);
                 }
-                else
+
+                try
                 {
-                    try
+                    _context.Update(vehicle);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!VehicleExists(vehicle.Id))
                     {
-                        _context.Update(vehicle);
-                        await _context.SaveChangesAsync();
+                        return NotFound();
                     }
-                    catch (DbUpdateConcurrencyException)
+                    else
                     {
-                        if (!VehicleExists(vehicle.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 }
 
@@ -350,6 +349,8 @@ namespace Garage3.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
 
         public async Task<IActionResult> Receipt(Vehicle vehicle)
         {
@@ -415,6 +416,91 @@ namespace Garage3.Controllers
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
+        }
+
+        
+
+        // GET: Vehicles/Statistics
+        [HttpGet]
+        /*public async Task<IActionResult> Overview()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+
+            var model = new VehiclesOverview
+            {
+                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
+            };
+
+            return View();
+        }*/
+        public async Task<IActionResult> Statistics()
+        {
+            var viewModel = new StatisticsViewModel
+            {
+                VehicleCountByType = await CalculateVehiclesCountByType(),
+                TotalWheelsCount = await CalculateTotalWheelsCount(),
+                TotalRevenue = await CalculateTotalRevenue(),
+            };
+
+            return View(viewModel);
+        }
+
+        private async Task<decimal> CalculateTotalRevenue()
+        {
+            decimal revenues = 0;
+            DateTime now = DateTime.Now;
+
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+            }
+
+            return revenues;
+        }
+
+        private async Task<int> CalculateTotalWheelsCount()
+        {
+            //  throw new NotImplementedException();
+            int totalWheels = 0;
+
+            // .Include(p => p.VehiclesTypes!)
+
+            var vehicles = _context.Vehicles
+                .Include(p => p.VehicleType!);
+                
+
+            foreach(var vehicle in vehicles)
+            {
+                totalWheels += vehicle.VehicleType.NumberOfWheels;
+               // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
+            }
+
+            return totalWheels;
+        }
+
+        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
+        {
+            Dictionary<string,int> result = new();
+
+            var vehicles = _context.Vehicles
+                .Include(v => v.VehicleType)
+                .Select(v => v)
+                ;
+
+            foreach (var vehicle in vehicles)
+            {
+                var type = vehicle.VehicleType.Name;
+                if (result.ContainsKey(type))
+                {
+                    result[type]++;
+                }
+                else
+                {
+                    result[type] = 1;
+                }
+            }
+
+            return result;
         }
 
         private async Task<bool> GarageIsFull()

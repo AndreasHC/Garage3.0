@@ -1,0 +1,46 @@
+﻿@using Garage3.ViewModels
+@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<h1>Statistics of parked Vehicles</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalWheelsCount)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalWheelsCount)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalRevenue)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalRevenue)
+        </dd>
+    </dl>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Vehicle Type</th>
+                <th>Amount of Vehicles</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kvp in Model.VehicleCountByType)
+            {
+                <tr>
+                    <td>@kvp.Key</td>
+                    <td>@kvp.Value</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

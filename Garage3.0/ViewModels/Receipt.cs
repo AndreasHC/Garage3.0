@@ -1,4 +1,5 @@
 ﻿using Garage3.Data;
+using Garage3.Helpers;
 using System.ComponentModel;
 using System.Security.Permissions;
 
@@ -14,7 +15,7 @@ namespace Garage3.ViewModels
         public DateTime CheckoutTime { get; set; }
         [DisplayName("Parking Duration")]
         public TimeSpan ParkingDuration => CheckoutTime - ParkingTime;
-        public int Price => Math.Max(((int)ParkingDuration.TotalSeconds) / 1000, 10);
+        public int Price => VehiclesHelper.GetParkingCost(ParkingDuration);
         [DisplayName("Parker Name")]
         public string ParkerName { get; set; }
         public Receipt(Vehicle vehicle, string parkerName)
