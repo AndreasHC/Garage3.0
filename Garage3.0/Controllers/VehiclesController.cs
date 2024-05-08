@@ -300,28 +300,50 @@ namespace Garage3.Controllers
         {
             var viewModel = new StatisticsViewModel
             {
-                VehiclesCountByType = CalculateVehiclesCountByType(),
-                TotalWheelsCount = CalculateTotalWheelsCount(),
-                TotalRevenue = CalculateTotalRevenue(),
-                // Beräkna andra statistikdata...
+                VehicleCountByType = await CalculateVehiclesCountByType(),
+                TotalWheelsCount = await CalculateTotalWheelsCount(),
+                TotalRevenue = await CalculateTotalRevenue(),
             };
 
             return View(viewModel);
         }
 
-        private decimal CalculateTotalRevenue()
+        private async Task<decimal> CalculateTotalRevenue()
+        {
+            decimal revenues = 0;
+            DateTime now = DateTime.Now;
+
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+            }
+
+            return revenues;
+        }
+
+        private Task<int> CalculateTotalWheelsCount()
         {
             throw new NotImplementedException();
         }
 
-        private int CalculateTotalWheelsCount()
+        private async Task<Dictionary<int, int>> CalculateVehiclesCountByType()
         {
-            throw new NotImplementedException();
-        }
+            Dictionary<int,int> result = new();
 
-        private Dictionary<string, int> CalculateVehiclesCountByType()
-        {
-            throw new NotImplementedException();
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                var type = vehicle.VehicleTypeId;
+                if (result.ContainsKey(type))
+                {
+                    result[type]++;
+                }
+                else
+                {
+                    result[type] = 1;
+                }
+            }
+
+            return result;
         }
     }
 }
