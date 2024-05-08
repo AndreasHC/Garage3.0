@@ -164,42 +164,7 @@ namespace Garage3.Controllers
                 VehicleType vehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId) ?? throw new InvalidDataException("Attempted to park vehicle of unregistered type.");
                 int spotSize = vehicleType.Size;
                 bool spotSizeIsInverted = vehicleType.SizeIsInverted;
-                int spot = -1;
-                if (spotSizeIsInverted)
-                {
-                    // Try to find a spot occupied by vehicles of the same size, but not to capacity
-                    var  spotsOccupiedByRightSize = await _context.SpotOccupations.Include(o => o.Vehicle).ThenInclude(v => v.VehicleType).Where(o => o.Vehicle.VehicleType.SizeIsInverted && o.Vehicle.VehicleType.Size == spotSize).Select(o => o.SpotId).ToListAsync();
-                    foreach (int spotToConsider in spotsOccupiedByRightSize)
-                    {
-                        if (await _context.SpotOccupations.Where(o => o.SpotId == spotToConsider).CountAsync() < spotSize)
-                        {
-                            spot = spotToConsider; break;
-                        }
-                    }
-                    // Try for empty spot
-                    if (spot == -1)
-                    {
-                        for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots"); i++)
-                        {
-                            if (!await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync())
-                            {
-                                spot = i; break;
-                            }
-                        }
-                    }
-
-                }
-
-                else
-                {
-                    for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots") - spotSize + 1; i++)
-                    {
-                        if (!await _context.SpotOccupations.Where(s => (s.SpotId >= i) & (s.SpotId < i + spotSize)).AnyAsync())
-                        {
-                            spot = i; break;
-                        }
-                    }
-                }
+                int spot = await FindSpot(vehicleType);
                 if (spot == -1)
                     return View("~/Views/Vehicles/Reject.cshtml");
 
