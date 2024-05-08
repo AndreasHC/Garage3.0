@@ -1,0 +1,24 @@
+﻿
+<style>
+    .parking-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .parking-spot {
+        width: 40px;
+        height: 20px;
+        margin-right: 3px;
+        margin-bottom: 10px;
+        background-color: red;
+        padding: 20px;
+        justify-content:center;
+        display:flex;
+        align-items:center;
+    }
+</style>
+<div class="parking-container">    @foreach (var spot in ViewBag.OccupancyDict)
+    {
+                 <div class="parking-spot" style="background-color: @(spot.Value ? "red" : "green")">@spot.Key</div>
+    }</div>

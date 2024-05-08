@@ -8,22 +8,29 @@ using Microsoft.EntityFrameworkCore;
 using Garage3.Data;
 using Garage3.Helpers;
 using Garage3.ViewModels;
+using Garage3.Models;
+using System.Text;
 
 namespace Garage3.Controllers
 {
     public class VehiclesController : Controller
     {
         private readonly GarageContext _context;
+        private readonly IConfiguration _configuration;
 
-        public VehiclesController(GarageContext context)
+        public VehiclesController(GarageContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: Vehicles
         public async Task<IActionResult> Index()
         {
             ViewBag.VehicleTypeId = TypeFilterSelectList("All");
+            ViewBag.GarageIsFull = await GarageIsFull();
+            // Call the Spaces action to get occupancy data
+            await Spaces();
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
         }
@@ -80,14 +87,17 @@ namespace Garage3.Controllers
             {
                 return NotFound();
             }
+            var spots = await _context.SpotOccupations.Where(s => s.VehicleId == id).Select(s => s.SpotId).ToListAsync();
+            ViewBag.SpotList = String.Join(", ", spots);
 
             return View(vehicle);
         }
 
         // GET: Vehicles/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
+            var viableVehicleTypes = await _context.VehicleTypes.ToAsyncEnumerable().WhereAwait(async (v) => (await FindSpot(v)) != -1).ToListAsync();
+            ViewData["VehicleTypeId"] = new SelectList(viableVehicleTypes, "Id", "Name");
             ViewData["OwnerId"] = OwnerSelectList();
             return View();
         }
@@ -112,6 +122,8 @@ namespace Garage3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
+            if (await GarageIsFull())
+                 return View("~/Views/Vehicles/Reject.cshtml");
             if (ModelState.IsValid)
             {
                 bool problemDetected = false;
@@ -125,7 +137,7 @@ namespace Garage3.Controllers
                 }
 
                 var owner = await _context.Members.FindAsync(vehicle.OwnerId);
-                
+
                 if (owner == null)
                 {
                     problemDetected = true;
@@ -148,9 +160,24 @@ namespace Garage3.Controllers
                     ViewData["OwnerId"] = OwnerSelectList();
                     return View(vehicle);
                 }
+                VehicleType vehicleType = await _context.VehicleTypes.FindAsync(vehicle.VehicleTypeId) ?? throw new InvalidDataException("Attempted to park vehicle of unregistered type.");
+                int spotSize = vehicleType.Size;
+                bool spotSizeIsInverted = vehicleType.SizeIsInverted;
+                int spot = await FindSpot(vehicleType);
+                if (spot == -1)
+                    return View("~/Views/Vehicles/Reject.cshtml");
 
                 vehicle.ParkingTime = DateTime.Now;
                 _context.Add(vehicle);
+                if (spotSizeIsInverted)
+                {
+                    _context.Add(new SpotOccupation() { SpotId = spot, VehicleId = vehicle.Id, Vehicle = vehicle });
+                }
+                else
+                {
+                    for (int i = 0; i < spotSize; i++)
+                        _context.Add(new SpotOccupation() { SpotId = spot + i, VehicleId = vehicle.Id, Vehicle = vehicle });
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
 
@@ -159,6 +186,48 @@ namespace Garage3.Controllers
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
             ViewData["OwnerId"] = OwnerSelectList();
             return View(vehicle);
+        }
+
+        private async Task<int> FindSpot(VehicleType vehicleType)
+        {
+            int spot = -1;
+            if (vehicleType.SizeIsInverted)
+            {
+                // Try to find a spot occupied by vehicles of the same size, but not to capacity
+                var spotsOccupiedByRightSize = await _context.SpotOccupations.Include(o => o.Vehicle).ThenInclude(v => v.VehicleType).Where(o => o.Vehicle.VehicleType.SizeIsInverted && o.Vehicle.VehicleType.Size == vehicleType.Size).Select(o => o.SpotId).ToListAsync();
+                foreach (int spotToConsider in spotsOccupiedByRightSize)
+                {
+                    if (await _context.SpotOccupations.Where(o => o.SpotId == spotToConsider).CountAsync() < vehicleType.Size)
+                    {
+                        spot = spotToConsider; break;
+                    }
+                }
+                // Try for empty spot
+                if (spot == -1)
+                {
+                    for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots"); i++)
+                    {
+                        if (!await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync())
+                        {
+                            spot = i; break;
+                        }
+                    }
+                }
+
+            }
+
+            else
+            {
+                for (int i = 0; i < _configuration.GetValue<int>("AppSettings:NumberOfSpots") - vehicleType.Size + 1; i++)
+                {
+                    if (!await _context.SpotOccupations.Where(s => (s.SpotId >= i) & (s.SpotId < i + vehicleType.Size)).AnyAsync())
+                    {
+                        spot = i; break;
+                    }
+                }
+            }
+
+            return spot;
         }
 
         // GET: Vehicles/Edit/5
@@ -291,6 +360,19 @@ namespace Garage3.Controllers
             return View(receipt);
         }
 
+        public async Task<IActionResult> Spaces()
+        {
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            Dictionary<int, bool> result = new Dictionary<int, bool>();
+            for (int i = 0; i < numberOfSpots; i++)
+            {
+                result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
+            }
+            ViewBag.OccupancyDict = result;
+            ViewBag.NumberOfSpots = numberOfSpots;
+            return View();
+        }
+
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
@@ -379,6 +461,23 @@ namespace Garage3.Controllers
             }
 
             return result;
+        }
+
+        private async Task<bool> GarageIsFull()
+        {
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            // find all small sizes currently in use
+            var smallSizes = await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted).GroupBy(v => v.VehicleType.Size).Select(group => group.Key).ToListAsync();
+            int fullyOccupiedSpots = 0;
+            foreach (int size in smallSizes)
+            {
+                // count (minimal) number of spots required to hold all small vehicles of this size (number of spots used may be larger)
+                fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted & v.VehicleType.Size == size).CountAsync() / size;
+            }
+            // count number of spots used to hold non-small vehicles
+            fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
+
+            return fullyOccupiedSpots >= numberOfSpots;
         }
     }
 }
