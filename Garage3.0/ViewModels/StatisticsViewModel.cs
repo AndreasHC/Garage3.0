@@ -5,7 +5,7 @@ namespace Garage3.ViewModels
     public class StatisticsViewModel
     {
         [DisplayName("Vehicle Amount By Type")] 
-        public Dictionary<int, int> VehicleCountByType { get; set; }
+        public Dictionary<string, int> VehicleCountByType { get; set; }
 
         [DisplayName("Total Number of Wheels")]
         public int TotalWheelsCount { get; set; }
