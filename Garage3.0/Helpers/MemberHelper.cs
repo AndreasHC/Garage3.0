@@ -24,7 +24,7 @@ namespace Garage3.Helpers
 
         internal static string FormatMembershipType(MembershipType value)
         {
-            if (value < MembershipType.Pro_Member || value > MembershipType.Regular_Member)
+            if (value > MembershipType.Pro_Member || value < MembershipType.Regular_Member)
             {
                 throw new ArgumentException($"Illegal value `{value}`");
             }
