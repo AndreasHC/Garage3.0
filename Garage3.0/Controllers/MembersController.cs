@@ -20,8 +20,7 @@ namespace Garage3.Controllers
            var members = await _context.Members
                 .Include(p => p.Vehicles!) // We claim that this does populate the Vehicles property with something, regardless of database state
                 .Include(m => m.Membership)
-                .OrderBy(p => EF.Functions.Collate(p.FirstName.Substring(0, 2), "Latin1_General_BIN")).ToListAsync()
- ;
+                .OrderBy(p => EF.Functions.Collate(p.FirstName.Substring(0, 2), "Latin1_General_BIN")).ToListAsync();
             return View(members);
         }
 
