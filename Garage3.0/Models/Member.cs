@@ -50,7 +50,10 @@ namespace Garage3.Data
 
         // Create a read-only property for the Membership Type
         [DisplayName("Membership Type")]
-        public string MembershipType => Membership.EndDate < DateTime.Today ? MemberHelper.Format(Data.MembershipType.Regular_Member) : MemberHelper.Format(Data.MembershipType.Pro_Member);
+        public string MembershipType => Membership != null && 
+            Membership.EndDate < DateTime.Today ? 
+            MemberHelper.Format(Data.MembershipType.Regular_Member) : 
+            MemberHelper.Format(Data.MembershipType.Pro_Member);
 
         // Relationships
         public Membership Membership { get; set; }
