@@ -258,6 +258,19 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
+        // GET: Garage/Overview
+        [HttpGet]
+        public async Task<IActionResult> Overview()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+
+            var model = new VehiclesOverview
+            {
+                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
+            };
+
+            return View();              
+        }
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
