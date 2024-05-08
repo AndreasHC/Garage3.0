@@ -28,7 +28,7 @@ namespace Garage3.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.VehicleTypeId = TypeFilterSelectList("All");
-            ViewBag.GarageIsFull = GarageIsFull();
+            ViewBag.GarageIsFull = await GarageIsFull();
             var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
             return View(await garageContext.ToListAsync());
         }
@@ -119,7 +119,7 @@ namespace Garage3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
-            if (GarageIsFull())
+            if (await GarageIsFull())
                  return View("~/Views/Vehicles/Reject.cshtml");
             if (ModelState.IsValid)
             {
@@ -352,9 +352,21 @@ namespace Garage3.Controllers
             return _context.Vehicles.Any(e => e.Id == id);
         }
 
-        private bool GarageIsFull()
+        private async Task<bool> GarageIsFull()
         {
-            return _context.Vehicles.Count() >= _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            // find all small sizes currently in use
+            var smallSizes = await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted).GroupBy(v => v.VehicleType.Size).Select(group => group.Key).ToListAsync();
+            int fullyOccupiedSpots = 0;
+            foreach (int size in smallSizes)
+            {
+                // count (minimal) number of spots required to hold all small vehicles of this size (number of spots used may be larger)
+                fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted & v.VehicleType.Size == size).CountAsync() / size;
+            }
+            // count number of spots used to hold non-small vehicles
+            fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
+
+            return fullyOccupiedSpots >= numberOfSpots;
         }
     }
 }
