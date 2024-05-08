@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Garage3.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace Garage3.Data
@@ -12,6 +13,7 @@ namespace Garage3.Data
         public DbSet<Member> Members => Set<Member>();
         public DbSet<Vehicle> Vehicles => Set<Vehicle>();
         public DbSet<VehicleType> VehicleTypes => Set<VehicleType>();
+        public DbSet<SpotOccupation> SpotOccupations => Set<SpotOccupation>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
