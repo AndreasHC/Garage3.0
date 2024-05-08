@@ -14,10 +14,13 @@ else
 {
     <p><a asp-action="Create">Park a vehicle</a></p>
 }
+
 <p>
     <a asp-action="Spaces">Occupancy</a>
 </p>
-
+<div>
+    <span />@await Html.PartialAsync("Spaces.cshtml")</span>
+</div>
 <p>
     <a asp-action="Spaces">Occupancy</a>
 </p>
@@ -105,3 +108,5 @@ else
         }
     </tbody>
 </table>
+
+
