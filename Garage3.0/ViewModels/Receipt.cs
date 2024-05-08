@@ -7,6 +7,7 @@ namespace Garage3.ViewModels
 {
     public class Receipt
     {
+        public Member Member { get; set; }
         public VehicleType VehicleType { get; }
         [DisplayName("Registration Number")]
         public string RegistrationNumber { get; set; }
@@ -16,11 +17,12 @@ namespace Garage3.ViewModels
         public DateTime CheckoutTime { get; set; }
         [DisplayName("Parking Duration")]
         public TimeSpan ParkingDuration => CheckoutTime - ParkingTime;
-        public int Price => VehiclesHelper.GetParkingCost(VehicleType, ParkingDuration);
+        public int Price => VehiclesHelper.GetParkingCost(Member, VehicleType, ParkingTime);
         [DisplayName("Parker Name")]
         public string ParkerName { get; set; }
-        public Receipt(Vehicle vehicle, string parkerName)
+        public Receipt(Member member, Vehicle vehicle, string parkerName)
         {
+            Member = member;
             VehicleType = vehicle.VehicleType!;
             RegistrationNumber = vehicle.RegistrationNumber;
             ParkingTime = vehicle.ParkingTime;
