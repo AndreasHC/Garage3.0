@@ -36,29 +36,18 @@
             @if (Model.MembershipDaysLeft > 0)
             {
                 var daysLeft = Model.MembershipDaysLeft;
-                var yearsLeft = daysLeft / 365;
+                int yearsLeft = (int)daysLeft / 365;
 
                 if (yearsLeft > 0)
                 {
                     daysLeft -= yearsLeft * 365;
-                    @($"{yearsLeft} year{(yearsLeft > 1 ? "s" : "")} and {daysLeft}")
+                    @($"({yearsLeft} year{(yearsLeft > 1 ? "s" : "")} and {daysLeft})")
                 }
                 else
                 {
-                    @($"{daysLeft} days remaining")
+                    @($"({daysLeft} days remaining)")
                 }
             }
-@*             @Html.DisplayFor(model => model.MembershipType)
-            <span>
-                @if (Model.Membership.EndDate >= DateTime.Today)
-                {
-                    var changedDate = Model.Membership.EndDate.AddDays(-2);
-                    //var remainingDays = (Model.Membership.EndDate - DateTime.Today).TotalDays;
-                    var remainingDays = (changedDate - DateTime.Today).TotalDays;
-                    @($"{remainingDays} days remaining")
-                }
-            </span>
-            *@
         </dd>
         <dt class="col-sm-3">
             <p>Vehicles Count</p>

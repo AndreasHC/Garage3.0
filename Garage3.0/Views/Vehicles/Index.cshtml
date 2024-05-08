@@ -63,7 +63,7 @@ else
                 @Html.DisplayNameFor(model => model.Owner)
             </th>
             <th>
-                @* @Html.DisplayNameFor(model => model.Owner.Membership) *@
+                @Html.DisplayNameFor(model => model.Owner.MembershipType)
             </th>
             <th></th>
         </tr>
@@ -91,7 +91,7 @@ else
                     <a asp-controller="Members" asp-action="Details" asp-route-id=@item.OwnerId>@Html.DisplayFor(modelItem => item.Owner.FullName)</a>
                 </td>
                 <td>
-                    @* @Html.DisplayFor(modelItem => item.Owner.MembershipType) *@
+                    @Html.DisplayFor(modelItem => item.Owner.MembershipType)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
@@ -102,5 +102,3 @@ else
         }
     </tbody>
 </table>
-
-
