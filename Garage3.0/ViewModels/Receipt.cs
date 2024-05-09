@@ -17,7 +17,8 @@ namespace Garage3.ViewModels
         public DateTime CheckoutTime { get; set; }
         [DisplayName("Parking Duration")]
         public TimeSpan ParkingDuration => CheckoutTime - ParkingTime;
-        public int Price => VehiclesHelper.GetParkingCost(Member, VehicleType, ParkingTime);
+        public double Cost => ParkingCostHelper.CalculateParkingCostAndSavings(Member, VehicleType, ParkingTime).TotalCost;
+        public double Savings => ParkingCostHelper.CalculateParkingCostAndSavings(Member, VehicleType, ParkingTime).Savings;
         [DisplayName("Parker Name")]
         public string ParkerName { get; set; }
         public Receipt(Member member, Vehicle vehicle, string parkerName)

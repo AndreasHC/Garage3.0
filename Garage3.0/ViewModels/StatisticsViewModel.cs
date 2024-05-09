@@ -10,7 +10,7 @@ namespace Garage3.ViewModels
         [DisplayName("Total Number of Wheels")]
         public int TotalWheelsCount { get; set; }
 
-        [DisplayName("Total Amount of Wheels")]
+        [DisplayName("Total Revenue")]
         public decimal TotalRevenue { get; set; }
     }
 }
