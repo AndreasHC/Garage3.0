@@ -4,19 +4,13 @@ namespace Garage3.Helpers
 {
     public static class MembershipHelper
     {
-        public static bool IsProMember(Member member)
+        public static double CalculateDiscount(Member member, DateTime parkingTime)
         {
-            return member.EndDate >= DateTime.Today;
-        }
+            if (member.EndDate < parkingTime) return 0;
 
-        public static double CalculateDiscount(Member member, int numberOfSpaces)
-        {
-            if (!IsProMember(member)) return 0;
+            int numberOfSpots = ParkingCostHelper.CountOccupiedSpots(member);
 
-            var discountRate = 0.1 * numberOfSpaces;
-            discountRate = discountRate > 0.4 ? 0.4 : discountRate; // Max 40% rabatt
-            return discountRate;
+            return 0.1 * Math.Min(4, numberOfSpots);
         }
     }
-
 }

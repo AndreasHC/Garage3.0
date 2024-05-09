@@ -19,7 +19,7 @@ namespace Garage3.Helpers
 
         internal static string DisplayMemberType(DateTime endDate)
         {
-            return FormatMembershipType(endDate <= DateTime.Today ? MembershipType.Pro_Member : MembershipType.Regular_Member);
+            return FormatMembershipType(endDate >= DateTime.Today ? MembershipType.Pro_Member : MembershipType.Regular_Member);
         }
 
         internal static string FormatMembershipType(MembershipType value)
