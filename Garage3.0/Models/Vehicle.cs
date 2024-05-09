@@ -19,7 +19,10 @@ namespace Garage3.Data
 
         // Readonly property
         [DisplayName("Parking Cost")]
-        public int CurrentParkingCost => VehiclesHelper.GetParkingCost(Owner, VehicleType, ParkingTime);
+        public double CurrentParkingCost => ParkingCostHelper.CalculateParkingCostAndSavings(Owner, VehicleType, ParkingTime).TotalCost;
+
+        [DisplayName("Savings")]
+        public double Savings => ParkingCostHelper.CalculateParkingCostAndSavings(Owner, VehicleType, ParkingTime).Savings;
 
         // Relationships
         public int VehicleTypeId { get; set; }
