@@ -120,7 +120,7 @@ namespace Garage3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
+        public async Task<IActionResult> Create(Vehicle vehicle)
         {
             if (await GarageIsFull())
                  return View("~/Views/Vehicles/Reject.cshtml");
@@ -323,8 +323,9 @@ namespace Garage3.Controllers
             }
 
             var vehicle = await _context.Vehicles
-                .Include(v => v.VehicleType)
                 .Include(v => v.Owner)
+                .ThenInclude(m => m.Vehicles)
+                .ThenInclude(v => v.VehicleType)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {
@@ -339,7 +340,12 @@ namespace Garage3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var vehicle = await _context.Vehicles
+                .Include(v => v.Owner)
+                .ThenInclude(m => m.Vehicles)
+                .ThenInclude(v => v.VehicleType)
+                .FirstOrDefaultAsync(v => v.Id == id);
+            //var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle != null)
             {
                 _context.Vehicles.Remove(vehicle);
@@ -395,41 +401,38 @@ namespace Garage3.Controllers
         }*/
         public async Task<IActionResult> Statistics()
         {
+            var vehicles = _context.Vehicles
+                .Include(v => v.Owner)
+                .Include(v => v.VehicleType);
+
             var viewModel = new StatisticsViewModel
             {
-                VehicleCountByType = await CalculateVehiclesCountByType(),
-                TotalWheelsCount = await CalculateTotalWheelsCount(),
-                TotalRevenue = await CalculateTotalRevenue(),
+                VehicleCountByType = await CalculateVehiclesCountByType(vehicles),
+                TotalWheelsCount = await CalculateTotalWheelsCount(vehicles),
+                TotalRevenue = await CalculateTotalRevenue(vehicles),
             };
 
             return View(viewModel);
         }
 
-        private async Task<decimal> CalculateTotalRevenue()
+        private async Task<decimal> CalculateTotalRevenue(Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Vehicle, VehicleType?> vehicles)
         {
             decimal revenues = 0;
             DateTime now = DateTime.Now;
 
-            await foreach (var vehicle in _context.Vehicles)
+            await foreach (var vehicle in vehicles.AsAsyncEnumerable())
             {
-                revenues += VehiclesHelper.GetParkingCost(vehicle.Owner, vehicle.VehicleType, vehicle.ParkingTime);
+                revenues += (decimal)ParkingCostHelper.CalculateParkingCostAndSavings(vehicle.Owner, vehicle.VehicleType, vehicle.ParkingTime).TotalCost;
             }
 
             return revenues;
         }
 
-        private async Task<int> CalculateTotalWheelsCount()
+        private async Task<int> CalculateTotalWheelsCount(Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Vehicle, VehicleType?> vehicles)
         {
-            //  throw new NotImplementedException();
             int totalWheels = 0;
 
-            // .Include(p => p.VehiclesTypes!)
-
-            var vehicles = _context.Vehicles
-                .Include(p => p.VehicleType!);
-                
-
-            foreach(var vehicle in vehicles)
+            await foreach(var vehicle in vehicles.AsAsyncEnumerable())
             {
                 totalWheels += vehicle.VehicleType.NumberOfWheels;
                // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
@@ -438,13 +441,11 @@ namespace Garage3.Controllers
             return totalWheels;
         }
 
-        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
+        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType(Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Vehicle, VehicleType?> vehicles)
         {
             Dictionary<string,int> result = new();
 
-            var vehicles = _context.Vehicles.Include(v => v.VehicleType).AsAsyncEnumerable();
-
-            await foreach (var vehicle in vehicles)
+            await foreach (var vehicle in vehicles.AsAsyncEnumerable())
             {
                 var type = vehicle.VehicleType.Name;
                 if (result.ContainsKey(type))
@@ -473,7 +474,6 @@ namespace Garage3.Controllers
             }
             // count number of spots used to hold non-small vehicles
             fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
-
             return fullyOccupiedSpots >= numberOfSpots;
         }
     }
