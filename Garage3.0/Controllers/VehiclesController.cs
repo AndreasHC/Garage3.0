@@ -274,7 +274,7 @@ namespace Garage3.Controllers
 
             if (ModelState.IsValid)
             {
-                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber != vehicle.RegistrationNumber))
+                if (_context.Vehicles.Any(m => m.Id != vehicle.Id && m.RegistrationNumber == vehicle.RegistrationNumber))
                 {
                     ModelState.AddModelError("RegistrationNumber", "Registration number must be unique.");
                     ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", vehicle.VehicleTypeId);
