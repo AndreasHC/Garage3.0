@@ -365,22 +365,6 @@ namespace Garage3.Controllers
             return View(receipt);
         }
 
-        //public async Task<IActionResult> Spaces()
-        //{
-        //    int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
-        //    Dictionary<int, bool> result = new Dictionary<int, bool>();
-        //    //var spots =  _context.SpotOccupations.Include(a => a.Vehicle).Select(Vehicle);
-
-        //    for (int i = 0; i < numberOfSpots; i++)
-        //    {
-        //        result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
-        //    }
-        //    ViewBag.OccupancyDict = result;
-        //    ViewBag.NumberOfSpots = numberOfSpots;
-
-        //    return View();
-        //}
-
         public async Task<IActionResult> Spaces()
         {
             int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
@@ -502,41 +486,26 @@ namespace Garage3.Controllers
         }
 
         // GET: Vehicles/Delete/5
-        
-
-        // GET: Vehicles/Statistics
-        [HttpGet]
-        /*public async Task<IActionResult> Overview()
-        {
-            var vehicles = await _context.Vehicles.ToListAsync();
-
-            var model = new VehiclesOverview
-            {
-                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
-            };
-
-            return View();
-        }*/
         public async Task<IActionResult> Statistics()
         {
             var viewModel = new StatisticsViewModel
             {
                 VehicleCountByType = await CalculateVehiclesCountByType(),
                 TotalWheelsCount = await CalculateTotalWheelsCount(),
-                TotalRevenue = await CalculateTotalRevenue(),
+                TotalRevenue = await CalculateTotalRevenue(member, vehicleType, parkingTime),
             };
 
             return View(viewModel);
         }
 
-        private async Task<decimal> CalculateTotalRevenue()
+        private async Task<decimal> CalculateTotalRevenue(Member member, VehicleType vehicleType, DateTime parkingTime)
         {
             decimal revenues = 0;
             DateTime now = DateTime.Now;
 
             await foreach (var vehicle in _context.Vehicles)
             {
-                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+                revenues += (decimal)ParkingCostHelper.CalculateParkingCostAndSavings(member, vehicleType, parkingTime).TotalCost;
             }
 
             return revenues;
