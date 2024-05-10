@@ -485,19 +485,6 @@ namespace Garage3.Controllers
             return fullyOccupiedSpots >= numberOfSpots;
         }
 
-        // GET: Vehicles/Delete/5
-        public async Task<IActionResult> Statistics()
-        {
-            var viewModel = new StatisticsViewModel
-            {
-                VehicleCountByType = await CalculateVehiclesCountByType(),
-                TotalWheelsCount = await CalculateTotalWheelsCount(),
-                TotalRevenue = await CalculateTotalRevenue(member, vehicleType, parkingTime),
-            };
-
-            return View(viewModel);
-        }
-
         private async Task<decimal> CalculateTotalRevenue(Member member, VehicleType vehicleType, DateTime parkingTime)
         {
             decimal revenues = 0;
