@@ -1,11 +1,11 @@
-﻿namespace Garage3.Helpers
+﻿using Garage3.Data;
+namespace Garage3.Helpers
 {
     public class VehiclesHelper
     {
-        public static int GetParkingCost(Data.VehicleType vehicleType, TimeSpan parkingDuration)
+        public static int GetParkingCost(VehicleType vehicleType, TimeSpan parkingDuration)
         {
             double coefficient = 1.0;
-            double 
             if (!vehicleType.SizeIsInverted)
             {
 

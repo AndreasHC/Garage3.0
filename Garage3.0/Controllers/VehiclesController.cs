@@ -31,7 +31,7 @@ namespace Garage3.Controllers
             ViewBag.GarageIsFull = await GarageIsFull();
             // Call the Spaces action to get occupancy data
             await Spaces();
-            var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v=>v.Owner);
+            var garageContext = _context.Vehicles.Include(v => v.VehicleType).Include(v => v.Owner);
             return View(await garageContext.ToListAsync());
         }
 
@@ -50,7 +50,7 @@ namespace Garage3.Controllers
             }
             if (!string.IsNullOrEmpty(soughtRegistrationNumber))
             {
-                garageContext=garageContext.Where(v => v.RegistrationNumber.Contains(soughtRegistrationNumber));
+                garageContext = garageContext.Where(v => v.RegistrationNumber.Contains(soughtRegistrationNumber));
                 ViewBag.RegistrationNumber = soughtRegistrationNumber;
             }
             return View(await garageContext.ToListAsync());
@@ -123,7 +123,7 @@ namespace Garage3.Controllers
         public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Color,Brand,VehicleTypeId,OwnerId")] Vehicle vehicle)
         {
             if (await GarageIsFull())
-                 return View("~/Views/Vehicles/Reject.cshtml");
+                return View("~/Views/Vehicles/Reject.cshtml");
             if (ModelState.IsValid)
             {
                 bool problemDetected = false;
@@ -258,7 +258,7 @@ namespace Garage3.Controllers
             return View(vehicle);
         }
 
-      
+
 
         // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -359,23 +359,6 @@ namespace Garage3.Controllers
             Receipt receipt = new Receipt(vehicle, parkerName);
             return View(receipt);
         }
-
-        //public async Task<IActionResult> Spaces()
-        //{
-        //    int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
-        //    Dictionary<int, bool> result = new Dictionary<int, bool>();
-        //    //var spots =  _context.SpotOccupations.Include(a => a.Vehicle).Select(Vehicle);
-
-        //    for (int i = 0; i < numberOfSpots; i++)
-        //    {
-        //        result[i] = await _context.SpotOccupations.Where(s => s.SpotId == i).AnyAsync();
-        //    }
-        //    ViewBag.OccupancyDict = result;
-        //    ViewBag.NumberOfSpots = numberOfSpots;
-
-        //    return View();
-        //}
-
         public async Task<IActionResult> Spaces()
         {
             int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
@@ -410,9 +393,6 @@ namespace Garage3.Controllers
             return View(vehicles);
         }
 
-
-
-
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
@@ -436,7 +416,7 @@ namespace Garage3.Controllers
         }
 
         // GET: Vehicles/Delete/5
-        
+
 
         // GET: Vehicles/Statistics
         [HttpGet]
@@ -485,12 +465,12 @@ namespace Garage3.Controllers
 
             var vehicles = _context.Vehicles
                 .Include(p => p.VehicleType!);
-                
 
-            foreach(var vehicle in vehicles)
+
+            foreach (var vehicle in vehicles)
             {
                 totalWheels += vehicle.VehicleType.NumberOfWheels;
-               // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
+                // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
             }
 
             return totalWheels;
@@ -498,7 +478,7 @@ namespace Garage3.Controllers
 
         private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
         {
-            Dictionary<string,int> result = new();
+            Dictionary<string, int> result = new();
 
             var vehicles = _context.Vehicles
                 .Include(v => v.VehicleType)
@@ -519,6 +499,108 @@ namespace Garage3.Controllers
             }
 
             return result;
+        }
+
+
+
+        // GET: Vehicles/Statistics
+        [HttpGet]
+        /*public async Task<IActionResult> Overview()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+
+            var model = new VehiclesOverview
+            {
+                vehicleTypes = vehicles.Select(v => v.VehicleType).Distinct().Select(s => " " + s).ToList()
+            };
+
+            return View();
+        }*/
+        public async Task<IActionResult> Statistics()
+        {
+            var viewModel = new StatisticsViewModel
+            {
+                VehicleCountByType = await CalculateVehiclesCountByType(),
+                TotalWheelsCount = await CalculateTotalWheelsCount(),
+                TotalRevenue = await CalculateTotalRevenue(),
+            };
+
+            return View(viewModel);
+        }
+
+        private async Task<decimal> CalculateTotalRevenue()
+        {
+            decimal revenues = 0;
+            DateTime now = DateTime.Now;
+
+            await foreach (var vehicle in _context.Vehicles)
+            {
+                revenues += VehiclesHelper.GetParkingCost(vehicle.ParkingTime - now);
+            }
+
+            return revenues;
+        }
+
+        private async Task<int> CalculateTotalWheelsCount()
+        {
+            //  throw new NotImplementedException();
+            int totalWheels = 0;
+
+            // .Include(p => p.VehiclesTypes!)
+
+            var vehicles = _context.Vehicles
+                .Include(p => p.VehicleType!);
+
+
+            foreach (var vehicle in vehicles)
+            {
+                totalWheels += vehicle.VehicleType.NumberOfWheels;
+                // totalWheels = totalWheels + vehicle.VehicleType.NumberOfWheels;
+            }
+
+            return totalWheels;
+        }
+
+        private async Task<Dictionary<string, int>> CalculateVehiclesCountByType()
+        {
+            Dictionary<string, int> result = new();
+
+            var vehicles = _context.Vehicles
+                .Include(v => v.VehicleType)
+                .Select(v => v)
+                ;
+
+            foreach (var vehicle in vehicles)
+            {
+                var type = vehicle.VehicleType.Name;
+                if (result.ContainsKey(type))
+                {
+                    result[type]++;
+                }
+                else
+                {
+                    result[type] = 1;
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<bool> GarageIsFull()
+        {
+            int numberOfSpots = _configuration.GetValue<int>("AppSettings:NumberOfSpots");
+            // find all small sizes currently in use
+            var smallSizes = await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted).GroupBy(v => v.VehicleType.Size).Select(group => group.Key).ToListAsync();
+            int fullyOccupiedSpots = 0;
+            foreach (int size in smallSizes)
+            {
+                // count (minimal) number of spots required to hold all small vehicles of this size (number of spots used may be larger)
+                fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => v.VehicleType.SizeIsInverted & v.VehicleType.Size == size).CountAsync() / size;
+            }
+            // count number of spots used to hold non-small vehicles
+            fullyOccupiedSpots += await _context.Vehicles.Include(v => v.VehicleType).Where(v => !v.VehicleType.SizeIsInverted).SumAsync(v => v.VehicleType.Size);
+
+            return fullyOccupiedSpots >= numberOfSpots;
         }
     }
 }
