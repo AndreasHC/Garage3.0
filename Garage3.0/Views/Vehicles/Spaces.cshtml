@@ -1,0 +1,96 @@
+﻿
+   <style>
+.parking-container {
+    margin-top:20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.parking-spot {
+    width: 40px;
+    height: 20px;
+    margin-right: 3px;
+    margin-bottom: 10px;
+    padding: 20px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* Lägg till en klass för att ange bakgrundsfärg */
+.spot-red {
+    background-color: red;
+}
+
+.spot-green {
+    background-color: green;
+}
+
+    /* Lägg till hover-effekt */
+    .spot-red:hover,
+    .spot-green:hover {
+        background-color: blue;
+    }
+
+/* Tooltip-stil */
+.tooltip {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+   
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.parking-spot:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+</style>
+
+
+
+<div class="parking-container">
+    @if (ViewBag.OccupancyDict != null)
+    {
+        @foreach (var spot in ViewBag.OccupancyDict)
+        {
+            <div class="parking-spot @(spot.Value ? "spot-red" : "spot-green")">
+                @spot.Key
+                <span class="tooltip" style="bottom: @(spot.Value ? "-270%" : "120%")">
+                   
+                    Parking Number: @spot.Key <br>
+                    Status: @(spot.Value ? "Busy" : "Free")
+                    @if (spot.Value) // Check if the spot is occupied
+                    {
+                        <br>
+                        <br>
+                        @if (ViewBag.RegistrationNumbers != null && ViewBag.RegistrationNumbers.ContainsKey(spot.Key) && ViewBag.RegistrationNumbers[spot.Key].Count > 0)
+                        {
+                            @foreach (var registrationNumber in ViewBag.RegistrationNumbers[spot.Key])
+                            {
+                                <div>Reg Number: @registrationNumber</div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No registration numbers found</div>
+                        }
+                    }
+                </span>
+            </div>
+        }
+    }
+</div>
+
+

@@ -16,7 +16,7 @@
             <input type="hidden" asp-for="OwnerId" />
             <div class="form-group">
                 <label asp-for="RegistrationNumber" class="control-label"></label>
-                <input asp-for="RegistrationNumber" class="form-control" />
+                <input asp-for="RegistrationNumber" class="form-control" readonly />
                 <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -56,6 +56,7 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
+            <input asp-for="VehicleTypeId" class="form-control" readonly hidden/>
         </form>
     </div>
 </div>
