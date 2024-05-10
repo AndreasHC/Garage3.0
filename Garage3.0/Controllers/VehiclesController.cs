@@ -357,8 +357,6 @@ namespace Garage3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
         public async Task<IActionResult> Receipt(Vehicle vehicle)
         {
             Member owner = await _context.Members.FindAsync(vehicle.OwnerId) ?? throw new InvalidDataException("Tried to generate receipt without registered owner");
@@ -416,9 +414,6 @@ namespace Garage3.Controllers
             var vehicles = await _context.Vehicles.ToListAsync();
             return View(vehicles);
         }
-
-
-
 
         private bool VehicleExists(int id)
         {
